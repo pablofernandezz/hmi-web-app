@@ -1,0 +1,213 @@
+/* --- 1. Variables y Reset Básico --- */
+:root {
+    --primary-color: #007bff;
+    --bg-color: #f4f4f9;
+    --card-bg: #ffffff;
+    --text-main: #333;
+    --text-muted: #666;
+    --danger: #dc3545;
+    --success: #28a745;
+    --spacing: 1rem;
+    --radius: 8px;
+}
+
+* {
+    box_sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.5;
+}
+
+/* Utilidad para ocultar elementos visualmente pero mantenerlos para lectores de pantalla */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing);
+}
+
+/* --- 2. Estilos Base (MOBILE FIRST) --- */
+
+/* Header */
+.site-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Resumen (Summary) */
+.summary {
+    display: flex;
+    flex-direction: column; /* En móvil, uno debajo de otro */
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.summary-card .amount {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.summary-card.negative .amount {
+    color: var(--danger);
+}
+
+/* Lista de Gastos */
+.expenses-list h2 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.expense-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    
+    /* Flexbox para alinear icono, texto y precio en fila */
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.expense-icon {
+    font-size: 2rem;
+    background: #eee;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.expense-details {
+    flex-grow: 1; /* Ocupa el espacio restante */
+}
+
+.expense-details h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+}
+
+.expense-details p, .expense-details time {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: block;
+}
+
+.expense-amount {
+    text-align: right;
+    min-width: 80px;
+}
+
+.expense-amount .price {
+    display: block;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.expense-amount .status {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.status.pending { background-color: #ffeeba; color: #856404; }
+.status.settled { background-color: #d4edda; color: #155724; }
+
+/* Footer */
+.site-footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+
+/* --- 3. Media Queries (DISEÑO ADAPTATIVO) --- */
+
+/* Tablet (min-width: 768px) */
+@media (min-width: 768px) {
+    .summary {
+        flex-direction: row; /* Poner tarjetas de resumen lado a lado */
+    }
+    
+    .summary-card {
+        flex: 1; /* Que ocupen el mismo ancho */
+    }
+
+    .expenses-list-container {
+        /* Contenedor para grid de gastos si fuese necesario */
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+        gap: 1rem;
+    }
+    
+    /* Como en el HTML puse los articles directos, aplicamos el grid al section si queremos,
+       o dejamos lista vertical. Para este ejemplo, vamos a hacer grid de cartas */
+    /* NOTA: Para aplicar grid directo a los articles, necesitaríamos un div envoltorio
+       o aplicar display grid a .expenses-list, pero cuidado con el H2. 
+       Mejor dejarlos en lista para tablet y solo grid en desktop grande. */
+}
+
+/* Desktop (min-width: 1024px) */
+@media (min-width: 1024px) {
+    main.container {
+        display: grid;
+        grid-template-columns: 300px 1fr; /* Columna lateral fija + contenido */
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .summary {
+        flex-direction: column; /* Volvemos a columna vertical pero en el lateral */
+        position: sticky;
+        top: 1rem;
+    }
+
+    .expenses-list {
+        /* Aquí podríamos hacer un grid de 2 o 3 columnas para las cartas */
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        align-content: start;
+    }
+    
+    /* El título H2 ocupará toda la fila en el grid */
+    .expenses-list h2 {
+        grid-column: 1 / -1;
+    }
+}

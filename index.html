@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Informe de gastos compartidos del grupo Bon Jovi">
+    <title>SplitWithMe - Informe de Gastos</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="container">
+            <h1>SplitWithMe 💸</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="summary" aria-labelledby="summary-title">
+            <h2 id="summary-title" class="visually-hidden">Resumen de Cuentas</h2>
+            <div class="summary-card total">
+                <p>Gasto Total</p>
+                <p class="amount">1.250,00 €</p>
+            </div>
+            <div class="summary-card balance negative">
+                <p>Te deben</p>
+                <p class="amount">10,56 €</p>
+            </div>
+        </section>
+
+        <section class="expenses-list" aria-labelledby="expenses-title">
+            <h2 id="expenses-title">Historial de Gastos</h2>
+            
+            <article class="expense-card">
+                <div class="expense-icon" aria-hidden="true">✈️</div>
+                <div class="expense-details">
+                    <h3>Viaje a Coruña</h3>
+                    <p class="payer">Pagado por: <strong>Pablo</strong></p>
+                    <time datetime="2025-10-25">25 Oct 2025</time>
+                </div>
+                <div class="expense-amount">
+                    <span class="price">40,00 €</span>
+                    <span class="status pending">Pendiente</span>
+                </div>
+            </article>
+
+            <article class="expense-card">
+                <div class="expense-icon" aria-hidden="true">🍔</div>
+                <div class="expense-details">
+                    <h3>Cena de Bienvenida</h3>
+                    <p class="payer">Pagado por: <strong>Nicolás</strong></p>
+                    <time datetime="2025-10-26">26 Oct 2025</time>
+                </div>
+                <div class="expense-amount">
+                    <span class="price">72,50 €</span>
+                    <span class="status settled">Saldado</span>
+                </div>
+            </article>
+            
+            <article class="expense-card">
+                <div class="expense-icon" aria-hidden="true">⛽</div>
+                <div class="expense-details">
+                    <h3>Gasolina</h3>
+                    <p class="payer">Pagado por: <strong>Joel</strong></p>
+                    <time datetime="2025-10-27">27 Oct 2025</time>
+                </div>
+                <div class="expense-amount">
+                    <span class="price">60,00 €</span>
+                    <span class="status pending">Pendiente</span>
+                </div>
+            </article>
+
+             </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025 Grupo Bon Jovi - IPM</p>
+    </footer>
+</body>
+</html>
