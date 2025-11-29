@@ -1,18 +1,22 @@
-/* --- 1. Variables y Reset Básico --- */
+/* =========================================
+   1. VARIABLES Y RESET 
+   ========================================= */
 :root {
     --primary-color: #007bff;
+    --border-color: #ccc;
     --bg-color: #f4f4f9;
     --card-bg: #ffffff;
     --text-main: #333;
     --text-muted: #666;
     --danger: #dc3545;
     --success: #28a745;
+    --border-color: #e0e0e0;
     --spacing: 1rem;
-    --radius: 8px;
+    --radius: 12px;
 }
 
 * {
-    box_sizing: border-box;
+    box-sizing: border-box; 
     margin: 0;
     padding: 0;
 }
@@ -22,9 +26,9 @@ body {
     background-color: var(--bg-color);
     color: var(--text-main);
     line-height: 1.5;
+    font-size: 16px;
 }
 
-/* Utilidad para ocultar elementos visualmente pero mantenerlos para lectores de pantalla */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -36,28 +40,42 @@ body {
     border: 0;
 }
 
+/* Contenedor principal centrado */
 .container {
-    width: 90%;
+    width: 92%;
     max-width: 1200px;
     margin: 0 auto;
     padding: var(--spacing);
 }
 
-/* --- 2. Estilos Base (MOBILE FIRST) --- */
-
-/* Header */
+/* =========================================
+   2. HEADER Y FOOTER
+   ========================================= */
 .site-header {
     background-color: var(--primary-color);
     color: white;
     padding: 1rem 0;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-/* Resumen (Summary) */
+.site-footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 2rem;
+}
+
+/* =========================================
+   3. SECCIÓN DE RESUMEN (SUMMARY)
+   ========================================= */
 .summary {
     display: flex;
-    flex-direction: column; /* En móvil, uno debajo de otro */
+    flex-direction: column; /* movil  vertical */
     gap: 1rem;
     margin-bottom: 2rem;
 }
@@ -68,238 +86,281 @@ body {
     border-radius: var(--radius);
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.summary-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .summary-card .amount {
     font-size: 2rem;
-    font-weight: bold;
+    font-weight: 800;
     color: var(--primary-color);
+    margin-top: 0.5rem;
 }
 
 .summary-card.negative .amount {
     color: var(--danger);
 }
 
-/* Lista de Gastos */
+/* =========================================
+   4. LISTA DE GASTOS (TARJETAS) - CORREGIDO
+   ========================================= */
 .expenses-list h2 {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     font-size: 1.2rem;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
+    border-bottom: 2px solid var(--border-color);
+    display: inline-block;
+    padding-bottom: 8px;
 }
 
+/* estilo base para todas las tarjetas de gastos */
 .expense-card {
     background: var(--card-bg);
     border-radius: var(--radius);
-    padding: 1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    
-    /* Flexbox para alinear icono, texto y precio en fila */
-    display: block; 
-    transition: background-color 0.2s, border-left 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
     border-left: 5px solid transparent;
+    overflow: hidden;
+    transition: all 0.2s ease; 
 }
 
+/* estilo para tarjetas NO expandidas */
+.expense-card:not(.expanded) {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+/* estilo para tarjetas expandidas */
 .expense-card.expanded {
-    background-color: #f8f9fa;
-    border-left: 5px solid var(--primary-color);
+    padding: 0; /* sin padding general porque los hijos lo tienen */
 }
 
+/* cabecera de la tarjeta (siempre visible) */
 .card-summary {
     display: flex;
     align-items: center;
     gap: 1rem;
+    padding: 1.5rem;
+    background-color: #fff;
 }
 
 .expense-icon {
-    font-size: 2rem;
-    background: #eee;
+    font-size: 1.8rem;
+    background: #f8f9fa;
     width: 50px;
     height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .expense-details {
-    flex-grow: 1; /* Ocupa el espacio restante */
+    flex-grow: 1;
 }
 
 .expense-details h3 {
     font-size: 1.1rem;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.4rem;
+    color: var(--text-main);
 }
 
-.expense-details p, .expense-details time {
+.expense-details .payer, 
+.expense-details time {
     font-size: 0.85rem;
     color: var(--text-muted);
     display: block;
+    margin-bottom: 2px;
 }
 
 .expense-amount {
     text-align: right;
-    min-width: 80px;
+    flex-shrink: 0; 
+    margin-left: auto;
+    padding-left: 10px;
 }
 
 .expense-amount .price {
     display: block;
     font-weight: bold;
     font-size: 1.1rem;
+    color: var(--text-main);
+    margin-bottom: 5px;
 }
 
 .expense-amount .status {
     font-size: 0.75rem;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-top: 4px;
+    font-weight: 600;
 }
 
-.status.pending { background-color: #ffeeba; color: #856404; }
+.expense-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.status.pending { background-color: #fff3cd; color: #856404; }
 .status.settled { background-color: #d4edda; color: #155724; }
 
-/* Footer */
-.site-footer {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-
-/* --- 3. Media Queries (DISEÑO ADAPTATIVO) --- */
-
+/* =========================================
+   5. DETALLES DEL GASTO (NUEVO) - CORREGIDO
+   ========================================= */
 .card-details {
-    margin-top: 1rem;
-    padding-left: 66px; /* Sangría para alinear con texto */
-    font-size: 0.95rem;
-    color: #555;
-    animation: fadeIn 0.3s ease-in;
+    background-color: #fcfcfc;
+    border-top: 1px solid var(--border-color);
+    padding: 1.5rem;
+    font-size: 0.9rem;
+    animation: fadeIn 0.4s ease;
 }
 
+/* estilo para tarjeta expandida */
+.expense-card.expanded {
+    border-left: 5px solid var(--primary-color);
+}
+
+/* --- Resumen Financiero --- */
+.financial-summary {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+    background-color: #f1f3f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.fin-item {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.fin-item .label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.fin-item .value {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* --- Lista de Participantes --- */
 .separator {
     border: 0;
-    border-top: 1px solid #e0e0e0;
-    margin-bottom: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin: 1.5rem 0;
 }
 
-.label {
-    font-weight: bold;
-    margin-right: 0.5rem;
+.participants-section h4 {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
 }
 
-.detail-row {
-    margin-bottom: 0.5rem;
+.participants-list {
+    list-style: none;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- ESTILOS PANEL LATERAL (DERECHO) --- */
-.expense-detail-panel {
-    background: var(--card-bg);
-    padding: 1.5rem;
-    border-radius: var(--radius);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-.detail-header {
+.participants-list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px dashed var(--border-color);
 }
-.detail-header h3 { font-size: 1.5rem; color: var(--primary-color); margin: 0; }
-.participants-list { list-style: none; margin-top: 1rem; }
-.participants-list li { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #eee; }
 
+.participants-list li:last-child {
+    border-bottom: none;
+}
 
-/* --- LÓGICA DE VISIBILIDAD --- */
-.mobile-only { display: block; }
-.desktop-only { display: none; }
-.desktop-only-time { display: none; }
+.participant-info .name {
+    font-weight: 500;
+}
+.participant-info .role {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    margin-left: 4px;
+}
 
-/* --- 3. Media Queries (DISEÑO ADAPTATIVO) --- */
+/* Utilidades de color */
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+
+/* Animación de entrada */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   6. MEDIA QUERIES (ADAPTATIVO)
+   ========================================= */
 
 /* Tablet (min-width: 768px) */
 @media (min-width: 768px) {
     .summary {
-        flex-direction: row; /* Poner tarjetas de resumen lado a lado */
+        flex-direction: row; /* Resumen horizontal */
     }
     
-    .summary-card {
-        flex: 1; /* Que ocupen el mismo ancho */
-    }
-
-    .expenses-list-container {
-        /* Contenedor para grid de gastos si fuese necesario */
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-        gap: 1rem;
-    }
-    
-    /* Como en el HTML puse los articles directos, aplicamos el grid al section si queremos,
-       o dejamos lista vertical. Para este ejemplo, vamos a hacer grid de cartas */
-    /* NOTA: Para aplicar grid directo a los articles, necesitaríamos un div envoltorio
-       o aplicar display grid a .expenses-list, pero cuidado con el H2. 
-       Mejor dejarlos en lista para tablet y solo grid en desktop grande. */
-}
-
-/* Desktop (min-width: 1024px) */
-@media (min-width: 768px) {
-    
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: 40% 1fr;
-        gap: 2rem;
-        align-items: start;
-    }
-
-    .master-column {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .summary {
-        flex-direction: row; 
-    }
     .summary-card {
         flex: 1;
     }
-    
-    .expense-detail-panel {
-        margin-top: 0;
-        position: sticky;
-        top: 1rem;
-        height: fit-content;
+
+    /* Grid para las tarjetas de gastos */
+    .expenses-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+        gap: 1.5rem;
+        align-items: start;
     }
 
-    .mobile-only { display: block; } 
-
-    /* Mostramos también el panel lateral */
-    .desktop-only { display: block; }
-    
-    .desktop-only-time { display: block; }
-
-    /* Mantenemos la tarjeta en bloque para que quepan los detalles debajo */
-    .expense-card {
-        display: block; 
-        padding-bottom: 1.5rem;
-    }
-    
-    /* Mantenemos la cabecera flex para alinear icono y precio */
-    .card-summary {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-}
+    /* El título ocupa todo el ancho del grid */
     .expenses-list h2 {
         grid-column: 1 / -1;
+    }
+}
+
+/* Desktop (min-width: 1024px) */
+@media (min-width: 1024px) {
+    /* Layout lateral: Sidebar + Contenido */
+    main.container {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    .summary {
+        flex-direction: column;
+        position: sticky;
+        top: 6rem; /* Fijo al hacer scroll */
+    }
+
+    .expenses-list {
+        /* En pantallas grandes, volvemos a fluir o mantenemos 2 columnas anchas */
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     }
 }

@@ -47,14 +47,41 @@
                 </div>
 
                 <div class="card-details">
-                    <hr class="separator">
-                    <div class="detail-row">
-                        <span class="label">Participantes:</span>
-                        <span>Tú (Debes 20€), Pablo</span>
+                    
+                    <div class="financial-summary">
+                        <div class="fin-item">
+                            <span class="label">Total</span>
+                            <span class="value">40,00 €</span>
+                        </div>
+                        <div class="fin-item">
+                            <span class="label">Pagado</span>
+                            <span class="value text-success">20,00 €</span>
+                        </div>
+                        <div class="fin-item">
+                            <span class="label">Pendiente</span>
+                            <span class="value text-danger">20,00 €</span>
+                        </div>
                     </div>
-                    <br> <div class="detail-row">
-                        <span class="label">Estado:</span>
-                        <span style="color: var(--danger)">No saldado</span>
+
+                    <hr class="separator">
+
+                    <div class="participants-section">
+                        <h4>Participantes</h4>
+                        <ul class="participants-list">
+                            <li>
+                                <div class="participant-info">
+                                    <span class="name">Pablo</span>
+                                    <span class="role">(Pagador)</span>
+                                </div>
+                                <span class="amount text-success">20,00 € (Pagado)</span>
+                            </li>
+                            <li>
+                                <div class="participant-info">
+                                    <span class="name">Tú</span>
+                                </div>
+                                <span class="amount text-danger">Debes 20,00 €</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
