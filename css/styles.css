@@ -97,6 +97,17 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     
     /* Flexbox para alinear icono, texto y precio en fila */
+    display: block; 
+    transition: background-color 0.2s, border-left 0.2s;
+    border-left: 5px solid transparent;
+}
+
+.expense-card.expanded {
+    background-color: #f8f9fa;
+    border-left: 5px solid var(--primary-color);
+}
+
+.card-summary {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -159,6 +170,61 @@ body {
 
 /* --- 3. Media Queries (DISEÑO ADAPTATIVO) --- */
 
+.card-details {
+    margin-top: 1rem;
+    padding-left: 66px; /* Sangría para alinear con texto */
+    font-size: 0.95rem;
+    color: #555;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.separator {
+    border: 0;
+    border-top: 1px solid #e0e0e0;
+    margin-bottom: 1rem;
+}
+
+.label {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.detail-row {
+    margin-bottom: 0.5rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- ESTILOS PANEL LATERAL (DERECHO) --- */
+.expense-detail-panel {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 1rem;
+}
+.detail-header h3 { font-size: 1.5rem; color: var(--primary-color); margin: 0; }
+.participants-list { list-style: none; margin-top: 1rem; }
+.participants-list li { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #eee; }
+
+
+/* --- LÓGICA DE VISIBILIDAD --- */
+.mobile-only { display: block; }
+.desktop-only { display: none; }
+.desktop-only-time { display: none; }
+
+/* --- 3. Media Queries (DISEÑO ADAPTATIVO) --- */
+
 /* Tablet (min-width: 768px) */
 @media (min-width: 768px) {
     .summary {
@@ -184,29 +250,55 @@ body {
 }
 
 /* Desktop (min-width: 1024px) */
-@media (min-width: 1024px) {
-    main.container {
+@media (min-width: 768px) {
+    
+    .dashboard-grid {
         display: grid;
-        grid-template-columns: 300px 1fr; /* Columna lateral fija + contenido */
+        grid-template-columns: 40% 1fr;
         gap: 2rem;
         align-items: start;
     }
 
-    .summary {
-        flex-direction: column; /* Volvemos a columna vertical pero en el lateral */
-        position: sticky;
-        top: 1rem;
+    .master-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
     }
 
-    .expenses-list {
-        /* Aquí podríamos hacer un grid de 2 o 3 columnas para las cartas */
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1rem;
-        align-content: start;
+    .summary {
+        flex-direction: row; 
+    }
+    .summary-card {
+        flex: 1;
     }
     
-    /* El título H2 ocupará toda la fila en el grid */
+    .expense-detail-panel {
+        margin-top: 0;
+        position: sticky;
+        top: 1rem;
+        height: fit-content;
+    }
+
+    .mobile-only { display: block; } 
+
+    /* Mostramos también el panel lateral */
+    .desktop-only { display: block; }
+    
+    .desktop-only-time { display: block; }
+
+    /* Mantenemos la tarjeta en bloque para que quepan los detalles debajo */
+    .expense-card {
+        display: block; 
+        padding-bottom: 1.5rem;
+    }
+    
+    /* Mantenemos la cabecera flex para alinear icono y precio */
+    .card-summary {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+}
     .expenses-list h2 {
         grid-column: 1 / -1;
     }
