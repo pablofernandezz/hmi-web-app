@@ -31,17 +31,33 @@
         <section class="expenses-list" aria-labelledby="expenses-title">
             <h2 id="expenses-title">Historial de Gastos</h2>
             
-            <article class="expense-card">
-                <div class="expense-icon" aria-hidden="true">✈️</div>
-                <div class="expense-details">
-                    <h3>Viaje a Coruña</h3>
-                    <p class="payer">Pagado por: <strong>Pablo</strong></p>
-                    <time datetime="2025-10-25">25 Oct 2025</time>
+            <article class="expense-card expanded">
+                
+                <div class="card-summary">
+                    <div class="expense-icon" aria-hidden="true">✈️</div>
+                    <div class="expense-details">
+                        <h3>Viaje a Coruña</h3>
+                        <p class="payer">Pagado por: <strong>Pablo</strong></p>
+                        <time datetime="2025-10-25">25 Oct 2025</time>
+                    </div>
+                    <div class="expense-amount">
+                        <span class="price">40,00 €</span>
+                        <span class="status pending">Pendiente</span>
+                    </div>
                 </div>
-                <div class="expense-amount">
-                    <span class="price">40,00 €</span>
-                    <span class="status pending">Pendiente</span>
+
+                <div class="card-details">
+                    <hr class="separator">
+                    <div class="detail-row">
+                        <span class="label">Participantes:</span>
+                        <span>Tú (Debes 20€), Pablo</span>
+                    </div>
+                    <br> <div class="detail-row">
+                        <span class="label">Estado:</span>
+                        <span style="color: var(--danger)">No saldado</span>
+                    </div>
                 </div>
+
             </article>
 
             <article class="expense-card">
