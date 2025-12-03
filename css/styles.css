@@ -10,16 +10,12 @@
     --text-muted: #666;
     --danger: #dc3545;
     --success: #28a745;
-    --border-color: #e0e0e0;
+    --border-light: #e0e0e0;
     --spacing: 1rem;
     --radius: 12px;
 }
 
-* {
-    box-sizing: border-box; 
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: system-ui, -apple-system, sans-serif;
@@ -30,26 +26,19 @@ body {
 }
 
 .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
 }
 
-/* Contenedor principal centrado */
 .container {
     width: 92%;
-    max-width: 1200px;
+    max-width: 1400px; /* Aumentamos un poco para desktop ancho */
     margin: 0 auto;
     padding: var(--spacing);
 }
 
 /* =========================================
-   2. HEADER Y FOOTER
+   2. COMPONENTES GENERALES
    ========================================= */
 .site-header {
     background-color: var(--primary-color);
@@ -70,12 +59,17 @@ body {
     margin-top: 2rem;
 }
 
+/* --- Clases de Utilidad para Adaptabilidad --- */
+.desktop-only { display: none; } /* Oculto por defecto en móvil */
+.mobile-only { display: block; } /* Visible por defecto en móvil */
+
+
 /* =========================================
-   3. SECCIÓN DE RESUMEN (SUMMARY)
+   3. TARJETAS DE RESUMEN
    ========================================= */
 .summary {
     display: flex;
-    flex-direction: column; /* movil  vertical */
+    flex-direction: column;
     gap: 1rem;
     margin-bottom: 2rem;
 }
@@ -89,78 +83,56 @@ body {
     border: 1px solid var(--border-color);
 }
 
-.summary-card p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
 .summary-card .amount {
     font-size: 2rem;
     font-weight: 800;
     color: var(--primary-color);
-    margin-top: 0.5rem;
 }
+.summary-card.negative .amount { color: var(--danger); }
 
-.summary-card.negative .amount {
-    color: var(--danger);
-}
 
 /* =========================================
-   4. LISTA DE GASTOS (TARJETAS) - CORREGIDO
+   4. LISTA DE GASTOS (Izquierda)
    ========================================= */
 .expenses-list h2 {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     font-size: 1.2rem;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 2px solid var(--border-color);
+    border-bottom: 2px solid var(--border-light);
     display: inline-block;
-    padding-bottom: 8px;
 }
 
-/* estilo base para todas las tarjetas de gastos */
 .expense-card {
     background: var(--card-bg);
     border-radius: var(--radius);
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     border: 1px solid var(--border-color);
     border-left: 5px solid transparent;
     overflow: hidden;
-    transition: all 0.2s ease; 
+    transition: transform 0.2s ease;
 }
 
-/* estilo para tarjetas NO expandidas */
-.expense-card:not(.expanded) {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
+/* Estado activo para desktop (simula selección) */
+.expense-card.active {
+    border-left-color: var(--primary-color);
+    background-color: #fbfeff;
 }
 
-/* estilo para tarjetas expandidas */
-.expense-card.expanded {
-    padding: 0; /* sin padding general porque los hijos lo tienen */
-}
-
-/* cabecera de la tarjeta (siempre visible) */
 .card-summary {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1.5rem;
+    padding: 1.2rem;
     background-color: #fff;
 }
 
 .expense-icon {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     background: #f8f9fa;
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -168,199 +140,175 @@ body {
     flex-shrink: 0;
 }
 
-.expense-details {
-    flex-grow: 1;
-}
+.expense-details { flex-grow: 1; }
+.expense-details h3 { font-size: 1.1rem; margin-bottom: 0.2rem; }
+.expense-details .payer, .expense-details time { font-size: 0.85rem; color: var(--text-muted); display: block; }
 
-.expense-details h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.4rem;
-    color: var(--text-main);
-}
-
-.expense-details .payer, 
-.expense-details time {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: 2px;
-}
-
-.expense-amount {
-    text-align: right;
-    flex-shrink: 0; 
-    margin-left: auto;
-    padding-left: 10px;
-}
-
-.expense-amount .price {
-    display: block;
-    font-weight: bold;
-    font-size: 1.1rem;
-    color: var(--text-main);
-    margin-bottom: 5px;
-}
-
-.expense-amount .status {
-    font-size: 0.75rem;
-    padding: 6px 10px;
-    border-radius: 12px;
-    display: inline-block;
-    margin-top: 4px;
-    font-weight: 600;
-}
-
-.expense-card:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
-}
-
+.expense-amount { text-align: right; flex-shrink: 0; }
+.expense-amount .price { display: block; font-weight: bold; font-size: 1.1rem; }
+.expense-amount .status { font-size: 0.75rem; padding: 4px 8px; border-radius: 12px; display: inline-block; font-weight: 600; }
 .status.pending { background-color: #fff3cd; color: #856404; }
 .status.settled { background-color: #d4edda; color: #155724; }
 
+
 /* =========================================
-   5. DETALLES DEL GASTO (NUEVO) - CORREGIDO
+   5. DETALLES (Internos en móvil)
    ========================================= */
 .card-details {
     background-color: #fcfcfc;
-    border-top: 1px solid var(--border-color);
-    padding: 1.5rem;
+    border-top: 1px solid var(--border-light);
+    padding: 1rem;
     font-size: 0.9rem;
-    animation: fadeIn 0.4s ease;
 }
 
-/* estilo para tarjeta expandida */
-.expense-card.expanded {
-    border-left: 5px solid var(--primary-color);
-}
-
-/* --- Resumen Financiero --- */
 .financial-summary {
     display: flex;
     justify-content: space-between;
-    text-align: center;
     background-color: #f1f3f5;
-    padding: 15px;
+    padding: 10px;
     border-radius: 8px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
-.fin-item {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-}
+.fin-item { display: flex; flex-direction: column; flex: 1; }
+.fin-item .label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
+.fin-item .value { font-weight: bold; }
 
-.fin-item .label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 700;
-    margin-bottom: 6px;
-}
-
-.fin-item .value {
-    font-weight: bold;
-    font-size: 1rem;
-}
-
-/* --- Lista de Participantes --- */
-.separator {
-    border: 0;
-    border-top: 1px solid var(--border-color);
-    margin: 1.5rem 0;
-}
-
-.participants-section h4 {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 0.8rem;
-    text-transform: uppercase;
-    font-weight: 700;
-}
-
-.participants-list {
-    list-style: none;
-}
-
-.participants-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.8rem 0;
-    border-bottom: 1px dashed var(--border-color);
-}
-
-.participants-list li:last-child {
-    border-bottom: none;
-}
-
-.participant-info .name {
-    font-weight: 500;
-}
-.participant-info .role {
-    font-size: 0.8em;
-    color: var(--text-muted);
-    margin-left: 4px;
-}
-
-/* Utilidades de color */
+.participants-list { list-style: none; }
+.participants-list li { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed var(--border-light); }
 .text-success { color: var(--success); }
 .text-danger { color: var(--danger); }
 
-/* Animación de entrada */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* =========================================
+   TABLET (Entre 768px y 1023px)
+   ========================================= */
+@media (min-width: 768px) and (max-width: 1023px) {
+
+    /* 1. El resumen de arriba pasa a estar en fila (horizontal) */
+    .summary {
+        flex-direction: row;
+    }
+    
+    .summary-card {
+        flex: 1; /* Que las dos tarjetas de resumen ocupen lo mismo */
+    }
+
+    /* 2. LA CLAVE: Convertir la lista de gastos en una cuadrícula */
+    /* Como los <article> son hijos directos de .expenses-list (el section) */
+    .expenses-list {
+        display: grid;
+        /* Creamos 2 columnas de igual tamaño */
+        grid-template-columns: repeat(2, 1fr); 
+        /* Espacio entre tarjetas */
+        gap: 1.5rem; 
+        /* Alineación 'start' para que si una tarjeta es muy larga, 
+           la de al lado no se estire artificialmente */
+        align-items: start; 
+    }
+
+    /* 3. Excepción: El título H2 debe ocupar todo el ancho de arriba */
+    .expenses-list h2 {
+        grid-column: 1 / -1; /* Abarca desde la línea 1 hasta el final */
+        margin-bottom: 1.5rem;
+    }
 }
 
+
 /* =========================================
-   6. MEDIA QUERIES (ADAPTATIVO)
+   6. PANEL DE DETALLES (Solo Desktop)
+   ========================================= */
+.expense-detail-panel {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 2rem;
+    height: fit-content; /* Se ajusta al contenido */
+    position: sticky;
+    top: 5rem; /* Sticky header offset */
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 1.5rem;
+}
+
+.expense-icon-large {
+    font-size: 3rem;
+    background: #f0f4ff;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.detail-body .financial-summary {
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    margin-bottom: 2rem;
+}
+.detail-body .value.large { font-size: 1.4rem; }
+
+.payer-info { margin-bottom: 1rem; font-style: italic; color: var(--text-muted); }
+.actions-placeholder { 
+    margin-top: 2rem; 
+    padding: 1rem; 
+    border: 2px dashed var(--border-light); 
+    text-align: center; 
+    color: var(--text-muted);
+}
+
+
+/* =========================================
+   7. MEDIA QUERIES (Responsive)
    ========================================= */
 
 /* Tablet (min-width: 768px) */
 @media (min-width: 768px) {
     .summary {
-        flex-direction: row; /* Resumen horizontal */
+        flex-direction: row;
     }
+    .summary-card { flex: 1; }
     
-    .summary-card {
-        flex: 1;
-    }
-
-    /* Grid para las tarjetas de gastos */
-    .expenses-list {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-        gap: 1.5rem;
-        align-items: start;
-    }
-
-    /* El título ocupa todo el ancho del grid */
-    .expenses-list h2 {
-        grid-column: 1 / -1;
-    }
+    /* En tablet seguimos con lista, pero más ancha */
 }
 
-/* Desktop (min-width: 1024px) */
+/* Desktop (min-width: 1024px) - EL GRAN CAMBIO */
 @media (min-width: 1024px) {
-    /* Layout lateral: Sidebar + Contenido */
-    main.container {
+    /* Cambiamos visibilidad */
+    .mobile-only { display: none; } /* Ocultamos detalles dentro de tarjetas */
+    .desktop-only { display: block; } /* Mostramos panel lateral */
+
+    /* Layout Grid Maestro-Detalle */
+    .dashboard-grid {
         display: grid;
-        grid-template-columns: 300px 1fr;
-        gap: 3rem;
+        grid-template-columns: 400px 1fr; /* Columna fija izq, resto dcha */
+        gap: 2rem;
         align-items: start;
+    }
+
+    .master-column {
+        display: flex;
+        flex-direction: column;
     }
 
     .summary {
-        flex-direction: column;
-        position: sticky;
-        top: 6rem; /* Fijo al hacer scroll */
+        /* En layout lateral, el resumen vuelve a ser vertical o grid 2x1 */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
     }
-
-    .expenses-list {
-        /* En pantallas grandes, volvemos a fluir o mantenemos 2 columnas anchas */
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    
+    /* Ajustes visuales */
+    .expense-card:hover {
+        transform: translateX(5px); /* Efecto de selección */
+        cursor: pointer;
     }
 }
