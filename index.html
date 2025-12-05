@@ -32,12 +32,13 @@
             </section>
 
             <section class="expenses-list">
-            <h2>Historial de Gastos</h2>
-            
-            <div id="expenses-list">
-                <p>Cargando gastos...</p>
-            </div>
-        </section>
+                <h2>Historial de Gastos</h2>
+                
+                <div id="expenses-list">
+                    <p>Cargando gastos...</p>
+                </div>
+
+            </section>
         </div>
 
         <section class="expense-detail-panel desktop-only">
@@ -56,17 +57,29 @@
                 <div class="detail-body">
                     <div class="financial-summary">
                         <div class="fin-item">
-                            <span class="label">Importe Total</span>
-                            <span class="value large" id="detail-total">0,00 €</span>
+                            <span class="label">Total</span>
+                            <span class="value" id="detail-total">0,00 €</span>
                         </div>
+                        <div class="fin-item">
+                            <span class="label">Pagado</span>
+                            <span class="value text-success" id="detail-paid">0,00 €</span>
                         </div>
+                        <div class="fin-item">
+                            <span class="label">Pendiente</span>
+                            <span class="value text-danger" id="detail-pending">0,00 €</span>
+                        </div>
+                    </div>
 
                     <div class="participants-section">
                         <h3>Reparto del gasto</h3>
                         <ul class="participants-list" id="detail-participants">
                             </ul>
                     </div>
+
+                    <div class="actions-placeholder">
+                        <p><em>Aquí irán los botones de Editar y Eliminar en la Tarea 2</em></p>
                     </div>
+                </div>
             </div>
         </section>
     </main>
