@@ -312,3 +312,35 @@ body {
         cursor: pointer;
     }
 }
+
+/* =========================================
+   8. BOTÓN FLOTANTE (FAB)
+   ========================================= */
+.fab-btn {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem; /* Abajo a la izquierda */
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1.5rem;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.fab-btn:hover {
+    background-color: #0056b3;
+    transform: scale(1.1);
+}
+
+.fab-btn:active {
+    transform: scale(0.95);
+}
