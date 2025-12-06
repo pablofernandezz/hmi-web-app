@@ -521,3 +521,56 @@ dialog::backdrop {
     margin-top: 5px;
     font-style: italic;
 }
+
+/* =========================================
+   10. INDICADOR DE CARGA NO BLOQUEANTE (TOAST)
+   ========================================= */
+.loading-overlay {
+    position: fixed;
+    bottom: 30px;        /* Abajo */
+    left: 30px;          /* Izquierda (para no tapar el botón Nuevo Gasto) */
+    width: auto;         /* Tamaño automático */
+    height: auto;
+    background-color: #333; /* Fondo oscuro elegante */
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px; /* Bordes redondeados */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    
+    z-index: 9999;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    
+    /* CLAVE PARA CONCURRENCIA: */
+    pointer-events: none; /* Permite hacer clic "a través" de él si molesta */
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    transform: translateY(20px); /* Se esconde bajando */
+}
+
+.loading-overlay p {
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: white;
+}
+
+/* Spinner más pequeño y blanco */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

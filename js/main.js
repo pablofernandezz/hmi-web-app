@@ -3,6 +3,7 @@
 const API_URL = 'http://127.0.0.1:8000';
 
 let currentEditId = null;
+let loadingCounter = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     initDashboard();
@@ -10,11 +11,40 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAddModalListeners();
 });
 
+// --- UTILIDADES DE CARGA ---
+function showLoading() {
+    loadingCounter++; // Aumenta el contador
+    const overlay = document.getElementById('loading-overlay');
+    if(overlay) overlay.classList.remove('hidden');
+}
+
+function hideLoading() {
+    loadingCounter--; // Disminuye el contador
+    // Solo ocultamos si el contador es cero o negativo
+    if (loadingCounter <= 0) { 
+        loadingCounter = 0; // Previene números negativos
+        const overlay = document.getElementById('loading-overlay');
+        if(overlay) overlay.classList.add('hidden');
+    }
+}
+
+function toggleModalButtons(modalId, disabled) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    const buttons = modal.querySelectorAll('button');
+    buttons.forEach(btn => btn.disabled = disabled);
+}
+
 async function initDashboard() {
-    await Promise.all([
-        cargarListaGastos(),
-        cargarResumenGlobal()
-    ]);
+    showLoading();
+    try {
+        await Promise.all([
+            cargarListaGastos(),
+            cargarResumenGlobal()
+        ]);
+    } finally {
+        hideLoading();
+    }
 }
 
 // --- SETUP LISTENERS ---
@@ -199,6 +229,7 @@ function crearTarjetaGasto(gasto) {
 }
 
 async function cargarYMostrarDetalles(id, cardElement, isMobileExpanded) {
+    showLoading();
     try {
         const [gasto, participantes] = await Promise.all([
             fetch(`${API_URL}/expenses/${id}`).then(r => r.json()),
@@ -230,6 +261,8 @@ async function cargarYMostrarDetalles(id, cardElement, isMobileExpanded) {
 
     } catch (error) {
         console.error("Error cargando detalles:", error);
+    } finally {
+        hideLoading();
     }
 }
 
@@ -345,6 +378,9 @@ async function crearNuevoGasto() {
         date: date
     };
 
+    showLoading();
+    toggleModalButtons('add-modal', true);
+
     try {
         // 1. Crear el gasto (sin amigos)
         const response = await fetch(`${API_URL}/expenses/`, {
@@ -385,11 +421,14 @@ async function crearNuevoGasto() {
     } catch (error) {
         console.error(error);
         alert("Error de conexión.");
+    } finally {
+        hideLoading();
     }
 }
 
 // EDIT - OPEN
 async function abrirModalEdicion(id) {
+    showLoading();
     try {
         const [gastoRes, participantesRes] = await Promise.all([
             fetch(`${API_URL}/expenses/${id}`),
@@ -412,6 +451,10 @@ async function abrirModalEdicion(id) {
     } catch (error) {
         console.error(error);
         alert("Error cargando datos para editar.");
+    }
+    finally {
+        hideLoading();
+        toggleModalButtons('add-modal', false);
     }
 }
 
@@ -436,6 +479,9 @@ async function guardarEdicion() {
         alert("El gasto debe tener al menos un participante.");
         return;
     }
+
+    showLoading();
+    toggleModalButtons('edit-modal', true);
 
     try {
         // 1. Obtener el gasto actual y sus amigos actuales
@@ -504,18 +550,30 @@ async function guardarEdicion() {
         document.getElementById('edit-modal').close();
         await initDashboard(); 
         
-        const selected = document.querySelector(`.expense-card.selected`);
-        if(selected && selected.id === `gasto-${currentEditId}`) {
-            cargarYMostrarDetalles(currentEditId, selected, false);
+        const tarjetaActualizada = document.getElementById(`gasto-${currentEditId}`);
+        
+        if (tarjetaActualizada) {
+            // Volvemos a marcarla visualmente como seleccionada
+            tarjetaActualizada.classList.add('selected');
+            
+            // Forzamos la recarga de los detalles (esto actualizará la lista de participantes a la derecha)
+            await cargarYMostrarDetalles(currentEditId, tarjetaActualizada, false);
         }
+        
+        alert("Gasto actualizado correctamente");
     } catch (error) {
         console.error(error);
         alert("Error de conexión.");
+    } finally {
+        hideLoading();
+        toggleModalButtons('edit-modal', false);
     }
 }
 
 async function eliminarGasto(id) {
     if(!confirm("¿Estás seguro de que quieres eliminar este gasto?")) return;
+
+    showLoading();
 
     try {
         const response = await fetch(`${API_URL}/expenses/${id}`, {
@@ -537,6 +595,8 @@ async function eliminarGasto(id) {
     } catch (error) {
         console.error(error);
         alert("Error de conexión.");
+    } finally {
+        hideLoading();
     }
 }
 
