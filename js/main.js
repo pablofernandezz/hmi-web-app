@@ -2,22 +2,12 @@
 
 const API_URL = 'http://127.0.0.1:8000';
 
+let currentEditId = null; // Variable para saber qué gasto estamos editando
+
 document.addEventListener('DOMContentLoaded', () => {
     initDashboard();
-    
-    // Listener para el botón flotante
-    const btnAdd = document.getElementById('btn-add-expense');
-    if(btnAdd) {
-        btnAdd.addEventListener('click', async () => {
-            const nuevoGasto = {
-                description: "Gasto Web " + Math.floor(Math.random() * 100),
-                amount: parseFloat((Math.random() * 50 + 5).toFixed(2)),
-                date: new Date().toISOString().split('T')[0],
-                friend_ids: [1, 2] 
-            };
-            await crearGasto(nuevoGasto);
-        });
-    }
+    setupModalListeners();
+    //Bloque para crear gasto nuevo
 });
 
 async function initDashboard() {
@@ -25,6 +15,27 @@ async function initDashboard() {
         cargarListaGastos(),
         cargarResumenGlobal()
     ]);
+}
+
+function setupModalListeners() {
+    const modal = document.getElementById('edit-modal');
+    const btnCancel = document.getElementById('btn-cancel-edit');
+    const form = document.getElementById('edit-form');
+
+    // Botón Cancelar
+    if(btnCancel) {
+        btnCancel.addEventListener('click', () => {
+            modal.close(); // Cierra el modal nativo
+        });
+    }
+
+    // Botón Guardar (Submit del formulario)
+    if(form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evita recargar la página
+            await guardarEdicion();
+        });
+    }
 }
 
 // --- 1. GESTIÓN DE GASTOS ---
@@ -138,8 +149,7 @@ async function cargarYMostrarDetalles(id, cardElement, isMobileExpanded) {
         if (isMobileExpanded && cardElement) {
             const detailsContainer = cardElement.querySelector('.card-details');
             if(detailsContainer) {
-                detailsContainer.innerHTML = generarHtmlDetalles(total, pagado, pendiente, participantes);
-            }
+                detailsContainer.innerHTML = generarHtmlDetalles(gasto.id, total, pagado, pendiente, participantes);            }
         }
 
     } catch (error) {
@@ -184,12 +194,12 @@ function generarItemsParticipantes(participantes) {
     }).join('');
 }
 
-function generarHtmlDetalles(total, pagado, pendiente, participantes) {
+function generarHtmlDetalles(id, total, pagado, pendiente, participantes) { // <--- AÑADE 'id' AQUI
     const listaAmigosHtml = generarItemsParticipantes(participantes);
 
     return `
         <div class="financial-summary">
-            <div class="fin-item">
+             <div class="fin-item">
                 <span class="label">Total</span>
                 <span class="value">${formatCurrency(total)}</span>
             </div>
@@ -211,23 +221,24 @@ function generarHtmlDetalles(total, pagado, pendiente, participantes) {
                 ${listaAmigosHtml}
             </ul>
         </div>
+        
+        <div class="actions-container">
+            <button class="btn-action btn-edit" onclick="abrirModalEdicion(${id})">✏️ Editar</button>
+            <button class="btn-action btn-delete" onclick="eliminarGasto(${id})">🗑️ Eliminar</button>
+        </div>
     `;
 }
 
 function renderizarPanelEscritorio(gasto, total, pagado, pendiente, participantes) {
-    // 1. Textos Cabecera
+    // 1. Textos Cabecera y 2. Bloques (Igual que tenías)
     document.getElementById('detail-title').textContent = gasto.description;
     const fechaObj = new Date(gasto.date);
     document.getElementById('detail-date').textContent = fechaObj.toLocaleDateString('es-ES', { dateStyle: 'long' });
     document.getElementById('detail-subtitle').textContent = `ID: ${gasto.id}`;
-    
-    // 2. Bloques de Colores (Ahora igual que en móvil)
     document.getElementById('detail-total').textContent = formatCurrency(total);
     
-    // Asegurarse de que los elementos existen en el HTML de escritorio (los añadimos en index.html)
     const elPaid = document.getElementById('detail-paid');
     const elPending = document.getElementById('detail-pending');
-    
     if(elPaid) elPaid.textContent = formatCurrency(pagado);
     if(elPending) elPending.textContent = formatCurrency(pendiente);
     
@@ -235,6 +246,17 @@ function renderizarPanelEscritorio(gasto, total, pagado, pendiente, participante
     const listaContainer = document.getElementById('detail-participants');
     if(listaContainer) {
         listaContainer.innerHTML = generarItemsParticipantes(participantes);
+    }
+
+    // 4. Inyectar botones en el placeholder
+    const actionsPlaceholder = document.querySelector('.expense-detail-panel .actions-placeholder');
+    if(actionsPlaceholder) {
+        actionsPlaceholder.innerHTML = `
+            <div class="actions-container">
+                <button class="btn-action btn-edit" onclick="abrirModalEdicion(${gasto.id})">✏️ Editar</button>
+                <button class="btn-action btn-delete" onclick="eliminarGasto(${gasto.id})">🗑️ Eliminar gasto</button>
+            </div>
+        `;
     }
 }
 
@@ -277,21 +299,6 @@ async function cargarResumenGlobal() {
     } catch (e) { console.error(e); }
 }
 
-async function crearGasto(datosGasto) {
-    try {
-        const response = await fetch(`${API_URL}/expenses/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datosGasto)
-        });
-        if (response.ok) {
-            cargarListaGastos();
-        } else {
-            console.error('Error creando gasto');
-        }
-    } catch (e) { console.error(e); }
-}
-
 function formatCurrency(amount) {
     return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
 }
@@ -303,4 +310,102 @@ function obtenerIcono(texto) {
     if (t.includes('gasolina') || t.includes('coche')) return '⛽';
     if (t.includes('hotel')) return '🏨';
     return '💸';
+}
+
+async function eliminarGasto(id) {
+    if(!confirm("¿Estás seguro de que quieres eliminar este gasto?")) return;
+
+    try {
+        const response = await fetch(`${API_URL}/expenses/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert("Gasto eliminado correctamente");
+            // Limpiamos panel y recargamos
+            document.getElementById('detail-title').textContent = "Selecciona un gasto";
+            document.getElementById('detail-date').textContent = "--/--/----";
+            document.getElementById('detail-total').textContent = "0,00 €";
+            document.getElementById('detail-participants').innerHTML = "";
+            const placeholder = document.querySelector('.expense-detail-panel .actions-placeholder');
+            if(placeholder) placeholder.innerHTML = '<p class="text-muted">Selecciona un gasto...</p>';
+            
+            await initDashboard(); 
+        } else {
+            alert("Error al eliminar el gasto.");
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error de conexión.");
+    }
+}
+
+// 1. ABRIR EL MODAL Y RELLENAR DATOS
+async function abrirModalEdicion(id) {
+    try {
+        const response = await fetch(`${API_URL}/expenses/${id}`);
+        const gasto = await response.json();
+
+        // Rellenar formulario
+        document.getElementById('edit-desc').value = gasto.description;
+        document.getElementById('edit-amount').value = gasto.amount;
+        document.getElementById('edit-date').value = gasto.date.split('T')[0]; // Formato YYYY-MM-DD
+        
+        // Guardar ID globalmente para usarlo al guardar
+        currentEditId = id;
+
+        // Mostrar Modal
+        const modal = document.getElementById('edit-modal');
+        modal.showModal(); // Método nativo del navegador
+
+    } catch (error) {
+        console.error(error);
+        alert("Error cargando datos para editar.");
+    }
+}
+
+// 2. GUARDAR LOS CAMBIOS DEL MODAL
+async function guardarEdicion() {
+    if (!currentEditId) return;
+
+    // Obtener valores del formulario
+    const descripcion = document.getElementById('edit-desc').value;
+    const importe = parseFloat(document.getElementById('edit-amount').value);
+    const fecha = document.getElementById('edit-date').value;
+
+    try {
+        // Primero necesitamos el objeto original para no perder datos
+        const currentRes = await fetch(`${API_URL}/expenses/${currentEditId}`);
+        const current = await currentRes.json();
+
+        const datosActualizados = {
+            ...current,
+            description: descripcion,
+            amount: importe,
+            date: fecha
+        };
+
+        const response = await fetch(`${API_URL}/expenses/${currentEditId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosActualizados)
+        });
+
+        if (response.ok) {
+            document.getElementById('edit-modal').close(); // Cerrar modal
+            await initDashboard(); // Recargar lista
+            
+            // Actualizar panel lateral si está seleccionado
+            const selected = document.querySelector(`.expense-card.selected`);
+            if(selected && selected.id === `gasto-${currentEditId}`) {
+                cargarYMostrarDetalles(currentEditId, selected, false);
+            }
+            alert("¡Guardado correctamente!");
+        } else {
+            alert("Error al guardar.");
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error de conexión.");
+    }
 }
