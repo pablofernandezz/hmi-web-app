@@ -7,7 +7,7 @@ let currentEditId = null; // Variable para saber qué gasto estamos editando
 document.addEventListener('DOMContentLoaded', () => {
     initDashboard();
     setupModalListeners();
-    //Bloque para crear gasto nuevo
+    setupAddModalListeners();
 });
 
 async function initDashboard() {
@@ -403,6 +403,71 @@ async function guardarEdicion() {
             alert("¡Guardado correctamente!");
         } else {
             alert("Error al guardar.");
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error de conexión.");
+    }
+}
+
+// --- LÓGICA PARA AÑADIR GASTO ---
+
+function setupAddModalListeners() {
+    const btnAdd = document.getElementById('btn-add-expense');
+    const modal = document.getElementById('add-modal');
+    const btnCancel = document.getElementById('btn-cancel-add');
+    const form = document.getElementById('add-form');
+
+    // 1. Abrir Modal al pulsar el botón "Nuevo Gasto"
+    if(btnAdd) {
+        btnAdd.addEventListener('click', () => {
+            form.reset(); // Limpiar formulario
+            // Poner fecha de hoy por defecto
+            document.getElementById('add-date').value = new Date().toISOString().split('T')[0];
+            modal.showModal();
+        });
+    }
+
+    // 2. Cerrar Modal
+    if(btnCancel) {
+        btnCancel.addEventListener('click', () => modal.close());
+    }
+
+    // 3. Crear Gasto (Submit)
+    if(form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await crearNuevoGasto();
+        });
+    }
+}
+
+async function crearNuevoGasto() {
+    // Recoger datos
+    const desc = document.getElementById('add-desc').value;
+    const amount = parseFloat(document.getElementById('add-amount').value);
+    const date = document.getElementById('add-date').value;
+
+    const nuevoGasto = {
+        description: desc,
+        amount: amount,
+        date: date,
+        friend_ids: [1, 2] // Simplificación para la práctica
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/expenses/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevoGasto)
+        });
+
+        if (response.ok) {
+            document.getElementById('add-modal').close();
+            alert("Gasto creado correctamente");
+            await initDashboard(); // Refrescar la lista
+        } else {
+            alert("Error al crear el gasto.");
         }
     } catch (error) {
         console.error(error);

@@ -87,7 +87,37 @@
     <footer class="site-footer">
         <p>&copy; 2025 Grupo Bon Jovi - IPM</p>
     </footer>
-    
+
+    <button id="btn-add-expense" class="fab-btn">
+        <span style="font-size: 1.5rem; line-height: 1;">+</span> Nuevo Gasto
+    </button>
+
+    <dialog id="add-modal" class="modal-dialog">
+        <form id="add-form">
+            <h3>Nuevo Gasto</h3>
+            
+            <div class="form-group">
+                <label for="add-desc">Concepto</label>
+                <input type="text" id="add-desc" required placeholder="Ej: Taxi aeropuerto...">
+            </div>
+
+            <div class="form-group">
+                <label for="add-amount">Importe (€)</label>
+                <input type="number" id="add-amount" step="0.01" min="0.01" required placeholder="0.00">
+            </div>
+
+            <div class="form-group">
+                <label for="add-date">Fecha</label>
+                <input type="date" id="add-date" required>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="btn-cancel-add" class="btn-secondary">Cancelar</button>
+                <button type="submit" class="btn-primary">Crear Gasto</button>
+            </div>
+        </form>
+    </dialog>
+
     <dialog id="edit-modal" class="modal-dialog">
         <form id="edit-form">
             <h3>Editar Gasto</h3>

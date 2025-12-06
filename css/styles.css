@@ -433,3 +433,43 @@ dialog::backdrop {
 
 .btn-secondary { background-color: #e9ecef; color: #333; }
 .btn-secondary:hover { background-color: #dae0e5; }
+
+/* =========================================
+   8. BOTÓN FLOTANTE (FAB) - TAREA 3
+   ========================================= */
+.fab-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    
+    /* Diseño de Píldora Azul */
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50px; /* Bordes totalmente redondeados */
+    padding: 16px 24px;
+    
+    /* Texto e Icono */
+    font-size: 1rem;
+    font-weight: 700; /* Letra negrita */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacio entre el + y el texto */
+    
+    /* Sombra elegante azulada */
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+    
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.fab-btn:hover {
+    background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
+    transform: translateY(-3px); /* Se eleva un poco */
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
+}
+
+.fab-btn:active {
+    transform: translateY(0);
+}
