@@ -122,7 +122,6 @@ function setupContributionListeners() {
     }
 }
 
-// --- HELPER TO LOAD FRIENDS INTO MODALS ---
 
 async function cargarAmigosEnModal(containerId, inputName, participantesActuales = []) {
     const container = document.getElementById(containerId);
@@ -177,7 +176,7 @@ async function cargarAmigosEnModal(containerId, inputName, participantesActuales
     }
 }
 
-// --- 1. EXPENSE MANAGEMENT ---
+// --- 1. EXPENSEs ---
 
 async function cargarListaGastos() {
     const contenedor = document.getElementById('expenses-list');
@@ -448,7 +447,6 @@ async function crearNuevoGasto() {
         // 2. Asociar amigos uno por uno usando query parameters
         let todosAsociados = true;
         for (const friendId of friendIds) {
-            // IMPORTANTE: Usar parámetros de consulta como en la app de escritorio
             const asociacionResponse = await fetch(`${API_URL}/expenses/${gastoId}/friends?friend_id=${friendId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
