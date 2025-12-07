@@ -12,36 +12,50 @@
     <header class="site-header">
         <div class="container">
             <h1>SplitWithMe 💸</h1>
-            </div>
+            <nav class="view-nav">
+                <button id="nav-expenses" class="nav-tab active">Gastos</button>
+                <button id="nav-friends" class="nav-tab">Amigos</button>
+            </nav>
+        </div>
     </header>
 
     <main class="container dashboard-grid">
         
         <div class="master-column">
             
-            <section class="summary">
-                <h2 class="visually-hidden">Resumen de Cuentas</h2>
-                <div class="summary-card total">
-                    <p>Gasto Total</p>
-                    <p class="amount" id="dashboard-total">1.250,00 €</p>
-                </div>
-                <div class="summary-card balance negative">
-                    <p>Te deben</p>
-                    <p class="amount" id="dashboard-balance">10,56 €</p>
-                </div>
-            </section>
+            <div id="view-expenses">
+                <section class="summary">
+                    <h2 class="visually-hidden">Resumen de Cuentas</h2>
+                    <div class="summary-card total">
+                        <p>Gasto Total</p>
+                        <p class="amount" id="dashboard-total">1.250,00 €</p>
+                    </div>
+                    <div class="summary-card balance negative">
+                        <p>Te deben</p>
+                        <p class="amount" id="dashboard-balance">10,56 €</p>
+                    </div>
+                </section>
 
-            <section class="expenses-list">
-                <h2>Historial de Gastos</h2>
-                
-                <div id="expenses-list">
-                    <p>Cargando gastos...</p>
-                </div>
+                <section class="expenses-list">
+                    <h2>Historial de Gastos</h2>
+                    <div id="expenses-list">
+                        <p>Cargando gastos...</p>
+                    </div>
+                </section>
+            </div>
 
-            </section>
+            <div id="view-friends" class="hidden">
+                <section class="expenses-list">
+                    <h2>Mis Amigos</h2>
+                    <div id="friends-list">
+                        <p class="text-muted">Cargando lista...</p>
+                    </div>
+                </section>
+            </div>
+
         </div>
 
-        <section class="expense-detail-panel desktop-only">
+        <section id="panel-expenses" class="expense-detail-panel desktop-only">
             <div class="detail-container">
                 <header class="detail-header">
                     <div class="expense-icon-large" aria-hidden="true">📝</div>
@@ -73,7 +87,7 @@
                     <div class="participants-section">
                         <h3>Reparto del gasto</h3>
                         <ul class="participants-list" id="detail-participants">
-                            </ul>
+                        </ul>
                     </div>
 
                     <div class="actions-placeholder">
@@ -82,6 +96,34 @@
                 </div>
             </div>
         </section>
+
+        <section id="panel-friends" class="expense-detail-panel desktop-only hidden">
+            <div class="detail-container">
+                <header class="detail-header">
+                    <div class="expense-icon-large" aria-hidden="true" style="background:#e3f2fd;">👤</div>
+                    <div>
+                        <h2 id="friend-detail-name">Selecciona un amigo</h2>
+                    </div>
+                </header>
+
+                <div class="detail-body">
+                    <div class="financial-summary">
+                        <div class="fin-item">
+                            <span class="label">Balance Total</span>
+                            <span class="value large" id="friend-detail-balance">0,00 €</span>
+                        </div>
+                    </div>
+
+                    <div class="participants-section">
+                        <h3>Gastos asociados</h3>
+                        <ul class="participants-list" id="friend-detail-expenses">
+                            <li class="text-muted">Haz clic en un amigo para ver sus gastos.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <footer class="site-footer">

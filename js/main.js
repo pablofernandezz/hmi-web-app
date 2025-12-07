@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDashboard();
     setupModalListeners();
     setupAddModalListeners();
+    setupNavigation();
 });
 
 // --- UTILIDADES DE CARGA ---
@@ -649,4 +650,168 @@ function obtenerIcono(texto) {
     if (t.includes('gasolina') || t.includes('coche')) return '⛽';
     if (t.includes('hotel') || t.includes('alojamiento') || t.includes('casa')) return '🏨';
     return '💸';
+}
+
+function setupNavigation() {
+    const btnExpenses = document.getElementById('nav-expenses');
+    const btnFriends = document.getElementById('nav-friends');
+    
+    // Vistas y Paneles
+    const viewExpenses = document.getElementById('view-expenses');
+    const viewFriends = document.getElementById('view-friends');
+    const panelExpenses = document.getElementById('panel-expenses');
+    const panelFriends = document.getElementById('panel-friends');
+    const fabBtn = document.getElementById('btn-add-expense');
+
+    btnExpenses.addEventListener('click', () => {
+        btnExpenses.classList.add('active');
+        btnFriends.classList.remove('active');
+        
+        viewExpenses.classList.remove('hidden');
+        viewFriends.classList.add('hidden');
+        panelExpenses.classList.remove('hidden');
+        panelFriends.classList.add('hidden');
+        
+        if(fabBtn) fabBtn.style.display = 'flex'; 
+    });
+
+    btnFriends.addEventListener('click', () => {
+        btnFriends.classList.add('active');
+        btnExpenses.classList.remove('active');
+        
+        viewExpenses.classList.add('hidden');
+        viewFriends.classList.remove('hidden');
+        panelExpenses.classList.add('hidden');
+        panelFriends.classList.remove('hidden');
+        
+        if(fabBtn) fabBtn.style.display = 'none'; 
+        
+        cargarListaAmigos(); 
+    });
+}
+
+async function cargarListaAmigos() {
+    const contenedor = document.getElementById('friends-list');
+    contenedor.innerHTML = '<p class="text-muted">Cargando...</p>';
+
+    try {
+        const response = await fetch(`${API_URL}/friends`);
+        const amigos = await response.json();
+
+        contenedor.innerHTML = '';
+        if (amigos.length === 0) {
+            contenedor.innerHTML = '<p>No hay amigos.</p>';
+            return;
+        }
+
+        amigos.forEach(amigo => {
+            contenedor.appendChild(crearTarjetaAmigo(amigo));
+        });
+
+    } catch (error) {
+        console.error(error);
+        contenedor.innerHTML = '<p class="text-danger">Error al cargar.</p>';
+    }
+}
+
+function crearTarjetaAmigo(amigo) {
+    const article = document.createElement('article');
+    article.className = 'expense-card'; 
+    article.id = `amigo-${amigo.id}`;
+
+    const credit = Number(amigo.creditBalance || amigo.credit_balance || 0);
+    const debit = Number(amigo.debitBalance || amigo.debit_balance || 0);
+    const balance = credit - debit;
+
+    let balanceHtml = balance > 0 ? `+${formatCurrency(balance)}` : `${formatCurrency(balance)}`;
+    let colorStyle = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+
+    article.innerHTML = `
+        <header class="card-summary">
+            <div class="friend-icon" aria-hidden="true">👤</div>
+            <div class="expense-details">
+                <h3>${amigo.name}</h3>
+                <div class="small-info">ID: ${amigo.id}</div>
+            </div>
+            <div class="expense-amount">
+                <span class="price" style="color: ${colorStyle}">${balanceHtml}</span>
+                <span class="status settled">Ver detalles</span>
+            </div>
+        </header>
+
+        <section class="card-details mobile-only">
+            <div class="loading-spinner">Cargando gastos...</div>
+        </section>
+    `;
+
+    article.addEventListener('click', async () => {
+        // Reset visual
+        document.querySelectorAll('#friends-list .expense-card').forEach(c => {
+            c.classList.remove('selected');
+            if(c !== article) c.classList.remove('expanded');
+        });
+        article.classList.add('selected');
+        
+        const isExpanded = article.classList.toggle('expanded');
+
+        await cargarDetalleAmigoCompleto(amigo, article, isExpanded);
+    });
+
+    return article;
+}
+
+async function cargarDetalleAmigoCompleto(amigo, cardElement, isMobileExpanded) {
+    const balance = (Number(amigo.creditBalance)||0) - (Number(amigo.debitBalance)||0);
+    document.getElementById('friend-detail-name').textContent = amigo.name;
+    
+    const elBal = document.getElementById('friend-detail-balance');
+    elBal.textContent = formatCurrency(balance);
+    elBal.style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+    
+    document.getElementById('friend-detail-expenses').innerHTML = '<li class="text-muted">Cargando gastos...</li>';
+
+    try {
+        const response = await fetch(`${API_URL}/expenses`); 
+        const todosLosGastos = await response.json();
+        const gastosAmigo = todosLosGastos.filter(g => { return true; }).slice(0, 5);
+        
+        const listaHtml = gastosAmigo.length > 0 
+            ? gastosAmigo.map(g => `
+                <li style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="participant-info">
+                        <span class="name">${g.description}</span>
+                        <small style="display:block; color:#999;">${new Date(g.date).toLocaleDateString()}</small>
+                    </div>
+                    <span class="amount">${formatCurrency(g.amount)}</span>
+                </li>`).join('')
+            : '<li>No hay gastos asociados.</li>';
+
+        document.getElementById('friend-detail-expenses').innerHTML = listaHtml;
+
+        if (isMobileExpanded && cardElement) {
+            const detailsContainer = cardElement.querySelector('.card-details');
+            detailsContainer.innerHTML = `
+                <div class="financial-summary">
+                     <div class="fin-item">
+                        <span class="label">Pagado</span>
+                        <span class="value text-success">${formatCurrency(amigo.creditBalance||0)}</span>
+                    </div>
+                    <div class="fin-item">
+                        <span class="label">Debe</span>
+                        <span class="value text-danger">${formatCurrency(amigo.debitBalance||0)}</span>
+                    </div>
+                </div>
+                <div class="participants-section">
+                    <h4>Gastos Recientes</h4>
+                    <ul class="participants-list">
+                        ${listaHtml}
+                    </ul>
+                </div>
+            `;
+        }
+
+    } catch (e) {
+        console.error("Error cargando gastos de amigo", e);
+        document.getElementById('friend-detail-expenses').innerHTML = '<li class="text-danger">Error cargando gastos</li>';
+    }
 }

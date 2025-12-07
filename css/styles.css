@@ -574,3 +574,45 @@ dialog::backdrop {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* =========================================
+   11. NAVEGACIÓN Y VISTAS DE AMIGOS
+   ========================================= */
+
+.view-nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.nav-tab {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.nav-tab:hover { background: rgba(255,255,255,0.4); }
+
+.nav-tab.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.hidden { display: none !important; }
+
+.friend-icon {
+    font-size: 1.8rem;
+    background: #e3f2fd;
+    width: 50px; height: 50px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid #bbdefb;
+}
