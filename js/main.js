@@ -3,6 +3,7 @@
 const API_URL = 'http://127.0.0.1:8000';
 
 let currentEditId = null;
+let currentContributionData = null;
 let loadingCounter = 0;
 let listaGastosCache = [];
 
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDashboard();
     setupModalListeners();
     setupAddModalListeners();
+    setupContributionListeners();
     setupNavigation();
 });
 
@@ -96,6 +98,26 @@ function setupAddModalListeners() {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             await crearNuevoGasto();
+        });
+    }
+}
+
+function setupContributionListeners() {
+    const modal = document.getElementById('contribution-modal');
+    const btnCancel = document.getElementById('btn-cancel-contribution');
+    const form = document.getElementById('contribution-form');
+
+    if(btnCancel) {
+        btnCancel.addEventListener('click', () => {
+            modal.close();
+            currentContributionData = null;
+        });
+    }
+
+    if(form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await guardarAporte();
         });
     }
 }
@@ -196,6 +218,17 @@ function crearTarjetaGasto(gasto) {
     const fecha = new Date(gasto.date);
     const fechaStr = fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
     const precioFmt = formatCurrency(gasto.amount);
+    const total = Number(gasto.amount) || 0;
+    const pagado = Number(gasto.credit_balance || gasto.creditBalance || 0);
+    const pendiente = total - pagado;
+    
+    let statusHtml = '';
+
+    if (pendiente <= 0.01) {
+        statusHtml = '<span class="status settled">Saldado</span>';
+    } else {
+        statusHtml = '<span class="status pending">Pendiente</span>';
+    }
 
     article.innerHTML = `
         <header class="card-summary">
@@ -206,7 +239,7 @@ function crearTarjetaGasto(gasto) {
             </div>
             <div class="expense-amount">
                 <span class="price">${precioFmt}</span>
-                <span class="status pending">Ver detalles</span>
+                ${statusHtml}
             </div>
         </header>
         
@@ -269,18 +302,25 @@ async function cargarYMostrarDetalles(id, cardElement, isMobileExpanded) {
     }
 }
 
-function generarItemsParticipantes(participantes) {
+function generarItemsParticipantes(participantes, gastoId = null) {
     return participantes.map(p => {
         const credit = Number(p.creditBalance || p.credit_balance || 0);
         const debit = Number(p.debitBalance || p.debit_balance || 0);
         const deudaNeta = debit - credit;
         
         let infoHtml = '';
+        let botonPagarHtml = '';
         
         if (credit > 0.01 && deudaNeta <= 0.01) {
              infoHtml = `<span class="friend-status settled">Pagado (${formatCurrency(credit)})</span>`;
         } else if (deudaNeta > 0.01) {
              infoHtml = `<span class="friend-status pending">Debe ${formatCurrency(deudaNeta)}</span>`;
+             
+             if (gastoId) {
+                 const nombreSafe = p.name.replace(/'/g, "\\'");
+                 botonPagarHtml = `<button class="btn-pay" onclick="abrirModalAporte(${gastoId}, ${p.id}, '${nombreSafe}', ${deudaNeta})">💸 Pagar</button>`;
+             }
+
         } else {
              infoHtml = `<span class="friend-status settled">Al día</span>`;
         }
@@ -290,15 +330,18 @@ function generarItemsParticipantes(participantes) {
                 <div class="participant-info">
                     <span class="name">${p.name}</span>
                 </div>
-                ${infoHtml}
+                <div style="display:flex; align-items:center;">
+                    ${infoHtml}
+                    ${botonPagarHtml}
+                </div>
             </li>
         `;
     }).join('');
 }
 
-function generarHtmlDetalles(id, total, pagado, pendiente, participantes) { 
-    const listaAmigosHtml = generarItemsParticipantes(participantes);
-
+function generarHtmlDetalles(id, total, pagado, pendiente, participantes) {
+    const listaAmigosHtml = generarItemsParticipantes(participantes, id);
+    
     return `
         <div class="financial-summary">
              <div class="fin-item">
@@ -347,7 +390,7 @@ function renderizarPanelEscritorio(gasto, total, pagado, pendiente, participante
     
     const listaContainer = document.getElementById('detail-participants');
     if(listaContainer) {
-        listaContainer.innerHTML = generarItemsParticipantes(participantes);
+        listaContainer.innerHTML = generarItemsParticipantes(participantes, gasto.id);
     }
 
     const actionsPlaceholder = document.querySelector('.expense-detail-panel .actions-placeholder');
@@ -605,6 +648,67 @@ async function eliminarGasto(id) {
     }
 }
 
+function abrirModalAporte(gastoId, amigoId, nombreAmigo, deudaActual) {
+    currentContributionData = { gastoId, amigoId };
+    
+    const inputAmount = document.getElementById('contribution-amount');
+    const labelMax = document.getElementById('max-contribution');
+    const subtitle = document.getElementById('contribution-subtitle');
+    
+    subtitle.textContent = `Aporte de ${nombreAmigo}`;
+    labelMax.textContent = deudaActual.toFixed(2);
+    
+    inputAmount.value = deudaActual.toFixed(2);
+    inputAmount.max = deudaActual.toFixed(2);
+    
+    document.getElementById('contribution-modal').showModal();
+}
+
+async function guardarAporte() {
+    if (!currentContributionData) return;
+    
+    const amount = parseFloat(document.getElementById('contribution-amount').value);
+    
+    if (isNaN(amount) || amount <= 0) {
+        alert("Introduce una cantidad válida");
+        return;
+    }
+
+    showLoading();
+    
+    try {
+        const { gastoId, amigoId } = currentContributionData;
+        
+        const url = `${API_URL}/expenses/${gastoId}/friends/${amigoId}?amount=${amount}`;
+        
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            const errTxt = await response.text();
+            throw new Error(errTxt || "Error al registrar el aporte");
+        }
+
+        document.getElementById('contribution-modal').close();
+        currentContributionData = null;
+        
+        await initDashboard(); 
+        
+        const tarjeta = document.getElementById(`gasto-${gastoId}`);
+        if(tarjeta) {
+            const esMovilExpandido = tarjeta.classList.contains('expanded');
+            await cargarYMostrarDetalles(gastoId, tarjeta, esMovilExpandido);
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error al conectar con el servidor: " + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
 // --- UTILS ---
 
 function actualizarTotalGastos(gastos) {
@@ -634,10 +738,10 @@ async function cargarResumenGlobal() {
             
             if (saldo >= -0.01) { 
                 card.classList.remove('negative');
-                label.textContent = "Te deben";
+                label.textContent = "Debes";
             } else {
                 card.classList.add('negative');
-                label.textContent = "Debes";
+                label.textContent = "Te deben";
             }
         }
     } catch (e) { console.error(e); }
@@ -778,9 +882,8 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
     const elBal = document.getElementById('friend-detail-balance');
     if(elBal) {
         elBal.textContent = formatCurrency(Math.abs(balanceTotal));
-        
         const label = elBal.parentElement.querySelector('.label');
-        
+
         if (balanceTotal >= 0) {
             elBal.className = 'value large text-success';
             if(label) label.textContent = "Le deben";
@@ -813,11 +916,7 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
                 const r = await fetch(`${API_URL}/expenses/${g.id}/friends`);
                 const parts = await r.json();
                 const participa = parts.some(p => p.id === amigo.id);
-                
-                if (participa) {
-                    return g;
-                }
-                return null;
+                return participa ? g : null;
             } catch { return null; }
         });
 
@@ -831,18 +930,20 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
         } else {
             listaHtml = gastosDondeParticipa.map(g => {
                 return `
-                <li onclick="irAVerGasto(${g.id})" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px dashed #eee;">
+                <li style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px dashed #eee;">
                     <div class="participant-info">
                         <span class="name" style="font-weight:600; color:var(--text-main);">${g.description}</span>
-                        <small style="display:block; color:#999; font-size:0.8rem;">
-                            ${new Date(g.date).toLocaleDateString()}
-                        </small>
+                        <div style="display:flex; gap: 8px; align-items:center; margin-top:4px;">
+                            <small style="color:#999; font-size:0.8rem;">
+                                ${new Date(g.date).toLocaleDateString()}
+                            </small>
+                            <span style="font-size:0.85rem; font-weight:bold;">${formatCurrency(g.amount)}</span>
+                        </div>
                     </div>
                     <div style="text-align:right;">
-                        <span class="amount" style="font-size:1rem; font-weight:bold; display:block;">
-                            ${formatCurrency(g.amount)}
-                        </span>
-                        <small style="color:var(--primary-color); font-size:0.75rem;">Ver detalle &rarr;</small>
+                        <button class="btn-view-detail" onclick="irAVerGasto(${g.id})">
+                            👁️ Ver
+                        </button>
                     </div>
                 </li>`;
             }).join('');
