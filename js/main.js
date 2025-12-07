@@ -4,6 +4,7 @@ const API_URL = 'http://127.0.0.1:8000';
 
 let currentEditId = null;
 let loadingCounter = 0;
+let listaGastosCache = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     initDashboard();
@@ -164,6 +165,7 @@ async function cargarListaGastos() {
         if (!response.ok) throw new Error('Error connecting to API');
         
         const gastos = await response.json();
+        listaGastosCache = gastos;
         
         contenedor.innerHTML = '';
         
@@ -333,7 +335,9 @@ function renderizarPanelEscritorio(gasto, total, pagado, pendiente, participante
     document.getElementById('detail-title').textContent = gasto.description;
     const fechaObj = new Date(gasto.date);
     document.getElementById('detail-date').textContent = fechaObj.toLocaleDateString('es-ES', { dateStyle: 'long' });
-    document.getElementById('detail-subtitle').textContent = `ID: ${gasto.id}`;
+    const sub = document.getElementById('detail-subtitle');
+    if(sub) sub.textContent = "Detalle del gasto";
+
     document.getElementById('detail-total').textContent = formatCurrency(total);
     
     const elPaid = document.getElementById('detail-paid');
@@ -725,27 +729,32 @@ function crearTarjetaAmigo(amigo) {
 
     let balanceHtml = balance > 0 ? `+${formatCurrency(balance)}` : `${formatCurrency(balance)}`;
     let colorStyle = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+    
+    if(Math.abs(balance) < 0.01) {
+        balanceHtml = "0,00 €";
+        colorStyle = "var(--text-muted)";
+    }
 
     article.innerHTML = `
         <header class="card-summary">
             <div class="friend-icon" aria-hidden="true">👤</div>
             <div class="expense-details">
                 <h3>${amigo.name}</h3>
-                <div class="small-info">ID: ${amigo.id}</div>
-            </div>
+                </div>
             <div class="expense-amount">
                 <span class="price" style="color: ${colorStyle}">${balanceHtml}</span>
-                <span class="status settled">Ver detalles</span>
+                <span class="status settled">Ver gastos</span>
             </div>
         </header>
 
         <section class="card-details mobile-only">
-            <div class="loading-spinner">Cargando gastos...</div>
+            <div class="participants-section">
+                <div class="loading-spinner">Cargando historial...</div>
+            </div>
         </section>
     `;
 
     article.addEventListener('click', async () => {
-        // Reset visual
         document.querySelectorAll('#friends-list .expense-card').forEach(c => {
             c.classList.remove('selected');
             if(c !== article) c.classList.remove('expanded');
@@ -754,55 +763,98 @@ function crearTarjetaAmigo(amigo) {
         
         const isExpanded = article.classList.toggle('expanded');
 
-        await cargarDetalleAmigoCompleto(amigo, article, isExpanded);
+        await cargarDetalleAmigo(amigo, article, isExpanded);
     });
 
     return article;
 }
 
-async function cargarDetalleAmigoCompleto(amigo, cardElement, isMobileExpanded) {
-    const balance = (Number(amigo.creditBalance)||0) - (Number(amigo.debitBalance)||0);
+async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
     document.getElementById('friend-detail-name').textContent = amigo.name;
+    const credit = Number(amigo.creditBalance || amigo.credit_balance || 0);
+    const debit = Number(amigo.debitBalance || amigo.debit_balance || 0);
+    const balanceTotal = credit - debit;
     
     const elBal = document.getElementById('friend-detail-balance');
-    elBal.textContent = formatCurrency(balance);
-    elBal.style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
-    
-    document.getElementById('friend-detail-expenses').innerHTML = '<li class="text-muted">Cargando gastos...</li>';
+    if(elBal) {
+        elBal.textContent = formatCurrency(Math.abs(balanceTotal));
+        
+        const label = elBal.parentElement.querySelector('.label');
+        
+        if (balanceTotal >= 0) {
+            elBal.className = 'value large text-success';
+            if(label) label.textContent = "Le deben";
+        } else {
+            elBal.className = 'value large text-danger';
+            if(label) label.textContent = "Debe";
+        }
+    }
+
+    const listContainerPC = document.getElementById('friend-detail-expenses');
+    if(listContainerPC) listContainerPC.innerHTML = '<li class="text-muted">Cargando...</li>';
 
     try {
-        const response = await fetch(`${API_URL}/expenses`); 
-        const todosLosGastos = await response.json();
-        const gastosAmigo = todosLosGastos.filter(g => { return true; }).slice(0, 5);
-        
-        const listaHtml = gastosAmigo.length > 0 
-            ? gastosAmigo.map(g => `
-                <li style="display:flex; justify-content:space-between; align-items:center;">
-                    <div class="participant-info">
-                        <span class="name">${g.description}</span>
-                        <small style="display:block; color:#999;">${new Date(g.date).toLocaleDateString()}</small>
-                    </div>
-                    <span class="amount">${formatCurrency(g.amount)}</span>
-                </li>`).join('')
-            : '<li>No hay gastos asociados.</li>';
+        let gastosCandidatos = [];
+        if (listaGastosCache && listaGastosCache.length > 0) {
+            gastosCandidatos = listaGastosCache; 
+        } else {
+            const res = await fetch(`${API_URL}/expenses`);
+            if(!res.ok) throw new Error("Error");
+            gastosCandidatos = await res.json();
+            listaGastosCache = gastosCandidatos;
+        }
 
-        document.getElementById('friend-detail-expenses').innerHTML = listaHtml;
+        const ultimosGastos = gastosCandidatos
+            .sort((a,b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 20);
+
+        const promesas = ultimosGastos.map(async (g) => {
+            try {
+                const r = await fetch(`${API_URL}/expenses/${g.id}/friends`);
+                const parts = await r.json();
+                const participa = parts.some(p => p.id === amigo.id);
+                
+                if (participa) {
+                    return g;
+                }
+                return null;
+            } catch { return null; }
+        });
+
+        const resultados = await Promise.all(promesas);
+        const gastosDondeParticipa = resultados.filter(g => g !== null);
+
+        let listaHtml = '';
+        
+        if (gastosDondeParticipa.length === 0) {
+            listaHtml = '<li class="text-muted">No participa en gastos recientes.</li>';
+        } else {
+            listaHtml = gastosDondeParticipa.map(g => {
+                return `
+                <li onclick="irAVerGasto(${g.id})" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px dashed #eee;">
+                    <div class="participant-info">
+                        <span class="name" style="font-weight:600; color:var(--text-main);">${g.description}</span>
+                        <small style="display:block; color:#999; font-size:0.8rem;">
+                            ${new Date(g.date).toLocaleDateString()}
+                        </small>
+                    </div>
+                    <div style="text-align:right;">
+                        <span class="amount" style="font-size:1rem; font-weight:bold; display:block;">
+                            ${formatCurrency(g.amount)}
+                        </span>
+                        <small style="color:var(--primary-color); font-size:0.75rem;">Ver detalle &rarr;</small>
+                    </div>
+                </li>`;
+            }).join('');
+        }
+
+        if(listContainerPC) listContainerPC.innerHTML = listaHtml;
 
         if (isMobileExpanded && cardElement) {
             const detailsContainer = cardElement.querySelector('.card-details');
             detailsContainer.innerHTML = `
-                <div class="financial-summary">
-                     <div class="fin-item">
-                        <span class="label">Pagado</span>
-                        <span class="value text-success">${formatCurrency(amigo.creditBalance||0)}</span>
-                    </div>
-                    <div class="fin-item">
-                        <span class="label">Debe</span>
-                        <span class="value text-danger">${formatCurrency(amigo.debitBalance||0)}</span>
-                    </div>
-                </div>
-                <div class="participants-section">
-                    <h4>Gastos Recientes</h4>
+                <div class="participants-section" style="padding-top:0;">
+                    <h4 style="margin-bottom:10px;">Historial de Gastos</h4>
                     <ul class="participants-list">
                         ${listaHtml}
                     </ul>
@@ -811,7 +863,36 @@ async function cargarDetalleAmigoCompleto(amigo, cardElement, isMobileExpanded) 
         }
 
     } catch (e) {
-        console.error("Error cargando gastos de amigo", e);
-        document.getElementById('friend-detail-expenses').innerHTML = '<li class="text-danger">Error cargando gastos</li>';
+        console.error(e);
+        if(listContainerPC) listContainerPC.innerHTML = '<li class="text-danger">Error al cargar datos.</li>';
     }
+}
+
+function irAVerGasto(idGasto) {
+    const btnExpenses = document.getElementById('nav-expenses');
+    const btnFriends = document.getElementById('nav-friends');
+    const viewExpenses = document.getElementById('view-expenses');
+    const viewFriends = document.getElementById('view-friends');
+    const panelExpenses = document.getElementById('panel-expenses');
+    const panelFriends = document.getElementById('panel-friends');
+    const fabBtn = document.getElementById('btn-add-expense');
+
+    if(btnExpenses && btnFriends) {
+        btnExpenses.classList.add('active');
+        btnFriends.classList.remove('active');
+        
+        viewExpenses.classList.remove('hidden');
+        viewFriends.classList.add('hidden');
+        panelExpenses.classList.remove('hidden');
+        panelFriends.classList.add('hidden');
+        if(fabBtn) fabBtn.style.display = 'flex';
+    }
+
+    setTimeout(() => {
+        const tarjeta = document.getElementById(`gasto-${idGasto}`);
+        if (tarjeta) {
+            tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            tarjeta.click();
+        }
+    }, 100);
 }
