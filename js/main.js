@@ -883,7 +883,7 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
     if(elBal) {
         elBal.textContent = formatCurrency(Math.abs(balanceTotal));
         const label = elBal.parentElement.querySelector('.label');
-
+        
         if (balanceTotal >= 0) {
             elBal.className = 'value large text-success';
             if(label) label.textContent = "Le deben";
@@ -894,7 +894,7 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
     }
 
     const listContainerPC = document.getElementById('friend-detail-expenses');
-    if(listContainerPC) listContainerPC.innerHTML = '<li class="text-muted">Cargando...</li>';
+    if(listContainerPC) listContainerPC.innerHTML = '<li class="text-muted">Analizando participación...</li>';
 
     try {
         let gastosCandidatos = [];
@@ -902,7 +902,7 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
             gastosCandidatos = listaGastosCache; 
         } else {
             const res = await fetch(`${API_URL}/expenses`);
-            if(!res.ok) throw new Error("Error");
+            if(!res.ok) throw new Error("Error fetching expenses");
             gastosCandidatos = await res.json();
             listaGastosCache = gastosCandidatos;
         }
@@ -914,9 +914,20 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
         const promesas = ultimosGastos.map(async (g) => {
             try {
                 const r = await fetch(`${API_URL}/expenses/${g.id}/friends`);
-                const parts = await r.json();
-                const participa = parts.some(p => p.id === amigo.id);
-                return participa ? g : null;
+                const participantes = await r.json();
+                
+                const yo = participantes.find(p => p.id === amigo.id);
+                
+                if (yo) {
+                    const debe = Number(yo.debitBalance || yo.debit_balance || 0);
+                    const pago = Number(yo.creditBalance || yo.credit_balance || 0);
+                    
+                    return { 
+                        ...g, 
+                        miSaldoNeto: debe - pago 
+                    };
+                }
+                return null;
             } catch { return null; }
         });
 
@@ -929,6 +940,16 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
             listaHtml = '<li class="text-muted">No participa en gastos recientes.</li>';
         } else {
             listaHtml = gastosDondeParticipa.map(g => {
+                let textoEstado = '';
+                let claseColor = 'text-muted';
+                
+                if (g.miSaldoNeto > 0.01) {
+                    textoEstado = `Debe ${formatCurrency(g.miSaldoNeto)}`;
+                    claseColor = 'text-danger';
+                } else {
+                    textoEstado = 'Saldado';
+                }
+
                 return `
                 <li style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px dashed #eee;">
                     <div class="participant-info">
@@ -937,7 +958,9 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
                             <small style="color:#999; font-size:0.8rem;">
                                 ${new Date(g.date).toLocaleDateString()}
                             </small>
-                            <span style="font-size:0.85rem; font-weight:bold;">${formatCurrency(g.amount)}</span>
+                            <span style="font-size:0.85rem; font-weight:bold;" class="${claseColor}">
+                                ${textoEstado}
+                            </span>
                         </div>
                     </div>
                     <div style="text-align:right;">
@@ -948,7 +971,6 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
                 </li>`;
             }).join('');
         }
-
         if(listContainerPC) listContainerPC.innerHTML = listaHtml;
 
         if (isMobileExpanded && cardElement) {
