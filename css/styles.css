@@ -661,3 +661,67 @@ dialog::backdrop {
 .btn-view-detail:active {
     transform: translateY(0);
 }
+
+/* =========================================
+   12. ESTILOS PARA DETAILS/SUMMARY (Elementos semánticos)
+   ========================================= */
+
+/* Ocultar el marker por defecto de details */
+.expense-card details {
+    position: relative;
+}
+
+.expense-card details summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+/* Firefox: ocultar marker */
+.expense-card details summary::-webkit-details-marker {
+    display: none;
+}
+
+.expense-card details summary::marker {
+    content: '';
+    display: none;
+}
+
+/* Indicador visual de expansión */
+.expense-card details summary::after {
+    content: '▶';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.2s ease;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.expense-card details[open] summary::after {
+    transform: translateY(-50%) rotate(90deg);
+}
+
+/* Mostrar detalles cuando está abierto */
+.expense-card details[open] .card-details {
+    display: block;
+}
+
+/* =========================================
+   13. ESTILOS PARA MODALES DE MENSAJES
+   ========================================= */
+#message-modal, #confirm-modal {
+    max-width: 400px;
+    text-align: center;
+}
+
+#message-modal p, #confirm-modal p {
+    margin: 1.5rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+#message-modal h3, #confirm-modal h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}

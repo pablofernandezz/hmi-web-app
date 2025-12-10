@@ -1,4 +1,4 @@
-// js/main.js
+// js/main.js - VERSIÓN COMPLETA CORREGIDA
 
 const API_URL = 'http://127.0.0.1:8000';
 
@@ -6,6 +6,54 @@ let currentEditId = null;
 let currentContributionData = null;
 let loadingCounter = 0;
 let listaGastosCache = [];
+
+// --- NUEVAS FUNCIONES PARA REEMPLAZAR ALERT/CONFIRM ---
+function showMessage(message, title = 'Aviso') {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('message-modal');
+        document.getElementById('message-title').textContent = title;
+        document.getElementById('message-text').textContent = message;
+        
+        const btnOk = document.getElementById('message-ok');
+        
+        const handleClick = () => {
+            modal.close();
+            btnOk.removeEventListener('click', handleClick);
+            resolve();
+        };
+        
+        btnOk.addEventListener('click', handleClick);
+        modal.showModal();
+    });
+}
+
+function showConfirm(message, title = 'Confirmar') {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirm-modal');
+        document.getElementById('confirm-text').textContent = message;
+        modal.showModal();
+        
+        const btnOk = document.getElementById('confirm-ok');
+        const btnCancel = document.getElementById('confirm-cancel');
+        
+        const handleOk = () => {
+            modal.close();
+            btnOk.removeEventListener('click', handleOk);
+            btnCancel.removeEventListener('click', handleCancel);
+            resolve(true);
+        };
+        
+        const handleCancel = () => {
+            modal.close();
+            btnOk.removeEventListener('click', handleOk);
+            btnCancel.removeEventListener('click', handleCancel);
+            resolve(false);
+        };
+        
+        btnOk.addEventListener('click', handleOk);
+        btnCancel.addEventListener('click', handleCancel);
+    });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     initDashboard();
@@ -17,16 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- UTILIDADES DE CARGA ---
 function showLoading() {
-    loadingCounter++; // Aumenta el contador
+    loadingCounter++;
     const overlay = document.getElementById('loading-overlay');
     if(overlay) overlay.classList.remove('hidden');
 }
 
 function hideLoading() {
-    loadingCounter--; // Disminuye el contador
-    // Solo ocultamos si el contador es cero o negativo
+    loadingCounter--;
     if (loadingCounter <= 0) { 
-        loadingCounter = 0; // Previene números negativos
+        loadingCounter = 0;
         const overlay = document.getElementById('loading-overlay');
         if(overlay) overlay.classList.add('hidden');
     }
@@ -52,7 +99,6 @@ async function initDashboard() {
 }
 
 // --- SETUP LISTENERS ---
-
 function setupModalListeners() {
     const modal = document.getElementById('edit-modal');
     const btnCancel = document.getElementById('btn-cancel-edit');
@@ -121,7 +167,6 @@ function setupContributionListeners() {
         });
     }
 }
-
 
 async function cargarAmigosEnModal(containerId, inputName, participantesActuales = []) {
     const container = document.getElementById(containerId);
@@ -211,7 +256,7 @@ async function cargarListaGastos() {
 function crearTarjetaGasto(gasto) {
     const article = document.createElement('article');
     article.className = 'expense-card';
-    article.id = `gasto-${gasto.id}`; 
+    article.id = `gasto-${gasto.id}`;
     
     const icono = obtenerIcono(gasto.description);
     const fecha = new Date(gasto.date);
@@ -230,34 +275,45 @@ function crearTarjetaGasto(gasto) {
     }
 
     article.innerHTML = `
-        <header class="card-summary">
-            <div class="expense-icon" aria-hidden="true">${icono}</div>
-            <div class="expense-details">
-                <h3>${gasto.description}</h3>
-                <time datetime="${gasto.date}">${fechaStr}</time>
-            </div>
-            <div class="expense-amount">
-                <span class="price">${precioFmt}</span>
-                ${statusHtml}
-            </div>
-        </header>
-        
-        <section class="card-details mobile-only" id="mobile-details-${gasto.id}">
-            <div class="loading-spinner" style="text-align:center; padding: 1rem; color: #888;">
-                Cargando información...
-            </div>
-        </section>
+        <details>
+            <summary class="card-summary">
+                <div class="expense-icon" aria-hidden="true">${icono}</div>
+                <div class="expense-details">
+                    <h3>${gasto.description}</h3>
+                    <time datetime="${gasto.date}">${fechaStr}</time>
+                </div>
+                <div class="expense-amount">
+                    <span class="price">${precioFmt}</span>
+                    ${statusHtml}
+                </div>
+            </summary>
+            
+            <section class="card-details mobile-only" id="mobile-details-${gasto.id}">
+                <div class="loading-spinner" style="text-align:center; padding: 1rem; color: #888;">
+                    Cargando información...
+                </div>
+            </section>
+        </details>
     `;
 
-    article.addEventListener('click', async () => {
-        document.querySelectorAll('.expense-card').forEach(c => {
-            c.classList.remove('selected');
-            if(c !== article) c.classList.remove('expanded');
-        });
-        article.classList.add('selected');
-
-        const isExpanded = article.classList.toggle('expanded');
-        await cargarYMostrarDetalles(gasto.id, article, isExpanded);
+    const details = article.querySelector('details');
+    
+    details.addEventListener('toggle', async () => {
+        if (details.open) {
+            // Solo en móvil: expandir detalles
+            if (window.innerWidth < 1024) {
+                await cargarYMostrarDetalles(gasto.id, article, true);
+            }
+            
+            // En escritorio: marcar como seleccionado
+            if (window.innerWidth >= 1024) {
+                document.querySelectorAll('.expense-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                article.classList.add('selected');
+                await cargarYMostrarDetalles(gasto.id, article, false);
+            }
+        }
     });
 
     return article;
@@ -376,7 +432,10 @@ function generarHtmlDetalles(id, total, pagado, pendiente, participantes) {
 function renderizarPanelEscritorio(gasto, total, pagado, pendiente, participantes) {
     document.getElementById('detail-title').textContent = gasto.description;
     const fechaObj = new Date(gasto.date);
-    document.getElementById('detail-date').textContent = fechaObj.toLocaleDateString('es-ES', { dateStyle: 'long' });
+    const timeEl = document.getElementById('detail-date');
+    timeEl.textContent = fechaObj.toLocaleDateString('es-ES', { dateStyle: 'long' });
+    timeEl.setAttribute('datetime', gasto.date);
+    
     const sub = document.getElementById('detail-subtitle');
     if(sub) sub.textContent = "Detalle del gasto";
 
@@ -405,7 +464,6 @@ function renderizarPanelEscritorio(gasto, total, pagado, pendiente, participante
 
 // --- 2. LOGICA DE CREAR Y EDITAR ---
 
-// CREATE - AJUSTADO PARA ENVIAR PARÁMETROS COMO QUERY STRING
 async function crearNuevoGasto() {
     const desc = document.getElementById('add-desc').value;
     const amount = parseFloat(document.getElementById('add-amount').value);
@@ -415,7 +473,7 @@ async function crearNuevoGasto() {
     const friendIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
 
     if (friendIds.length === 0) {
-        alert("Debes seleccionar al menos un amigo.");
+        await showMessage("Debes seleccionar al menos un amigo.", "Atención");
         return;
     }
 
@@ -429,7 +487,6 @@ async function crearNuevoGasto() {
     toggleModalButtons('add-modal', true);
 
     try {
-        // 1. Crear el gasto (sin amigos)
         const response = await fetch(`${API_URL}/expenses/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -437,14 +494,13 @@ async function crearNuevoGasto() {
         });
 
         if (!response.ok) {
-            alert("Error al crear el gasto.");
+            await showMessage("Error al crear el gasto.", "Error");
             return;
         }
 
         const gastoCreado = await response.json();
         const gastoId = gastoCreado.id;
 
-        // 2. Asociar amigos uno por uno usando query parameters
         let todosAsociados = true;
         for (const friendId of friendIds) {
             const asociacionResponse = await fetch(`${API_URL}/expenses/${gastoId}/friends?friend_id=${friendId}`, {
@@ -459,20 +515,21 @@ async function crearNuevoGasto() {
         }
 
         if (!todosAsociados) {
-            alert("Gasto creado, pero hubo problemas al asociar algunos amigos.");
+            await showMessage("Gasto creado, pero hubo problemas al asociar algunos amigos.", "Aviso");
         }
 
         document.getElementById('add-modal').close();
-        await initDashboard(); 
+        await initDashboard();
+        await showMessage("Gasto creado exitosamente.", "Éxito");
     } catch (error) {
         console.error(error);
-        alert("Error de conexión.");
+        await showMessage("Error de conexión con el servidor.", "Error");
     } finally {
         hideLoading();
+        toggleModalButtons('add-modal', false);
     }
 }
 
-// EDIT - OPEN
 async function abrirModalEdicion(id) {
     showLoading();
     try {
@@ -496,7 +553,7 @@ async function abrirModalEdicion(id) {
 
     } catch (error) {
         console.error(error);
-        alert("Error cargando datos para editar.");
+        await showMessage("Error cargando datos para editar.", "Error");
     }
     finally {
         hideLoading();
@@ -504,7 +561,6 @@ async function abrirModalEdicion(id) {
     }
 }
 
-// EDIT - SAVE - AJUSTADO PARA ENVIAR PARÁMETROS COMO QUERY STRING
 async function guardarEdicion() {
     if (!currentEditId) return;
 
@@ -522,7 +578,7 @@ async function guardarEdicion() {
     });
 
     if (nuevosAmigosIds.length === 0) {
-        alert("El gasto debe tener al menos un participante.");
+        await showMessage("El gasto debe tener al menos un participante.", "Atención");
         return;
     }
 
@@ -530,7 +586,6 @@ async function guardarEdicion() {
     toggleModalButtons('edit-modal', true);
 
     try {
-        // 1. Obtener el gasto actual y sus amigos actuales
         const [currentRes, amigosRes] = await Promise.all([
             fetch(`${API_URL}/expenses/${currentEditId}`),
             fetch(`${API_URL}/expenses/${currentEditId}/friends`)
@@ -544,7 +599,6 @@ async function guardarEdicion() {
         const amigosActuales = await amigosRes.json();
         const amigosActualesIds = amigosActuales.map(a => a.id);
 
-        // 2. Actualizar los datos básicos del gasto
         const datosActualizados = {
             ...current,
             description: descripcion,
@@ -559,20 +613,16 @@ async function guardarEdicion() {
         });
 
         if (!updateRes.ok) {
-            alert("Error al guardar los cambios del gasto.");
+            await showMessage("Error al guardar los cambios del gasto.", "Error");
             return;
         }
 
-        // 3. Comparar listas de amigos y actualizar
         const idsAmigosOriginales = new Set(amigosActualesIds);
         const idsAmigosNuevos = new Set(nuevosAmigosIds);
         
-        // Amigos a añadir
         const idsAnadir = [...idsAmigosNuevos].filter(id => !idsAmigosOriginales.has(id));
-        // Amigos a quitar (solo si no han pagado)
         const idsQuitar = [...idsAmigosOriginales].filter(id => !idsAmigosNuevos.has(id));
         
-        // 4. Añadir nuevos amigos usando query parameters
         for (const amigoId of idsAnadir) {
             await fetch(`${API_URL}/expenses/${currentEditId}/friends?friend_id=${amigoId}`, {
                 method: 'POST',
@@ -580,9 +630,7 @@ async function guardarEdicion() {
             });
         }
         
-        // 5. Quitar amigos (solo si no han pagado)
         for (const amigoId of idsQuitar) {
-            // Verificar si el amigo ha pagado
             const amigo = amigosActuales.find(a => a.id === amigoId);
             const haPagado = amigo && (amigo.creditBalance > 0 || amigo.credit_balance > 0);
             
@@ -594,22 +642,19 @@ async function guardarEdicion() {
         }
 
         document.getElementById('edit-modal').close();
-        await initDashboard(); 
+        await initDashboard();
         
         const tarjetaActualizada = document.getElementById(`gasto-${currentEditId}`);
         
         if (tarjetaActualizada) {
-            // Volvemos a marcarla visualmente como seleccionada
             tarjetaActualizada.classList.add('selected');
-            
-            // Forzamos la recarga de los detalles (esto actualizará la lista de participantes a la derecha)
             await cargarYMostrarDetalles(currentEditId, tarjetaActualizada, false);
         }
         
-        alert("Gasto actualizado correctamente");
+        await showMessage("Gasto actualizado correctamente.", "Éxito");
     } catch (error) {
         console.error(error);
-        alert("Error de conexión.");
+        await showMessage("Error de conexión con el servidor.", "Error");
     } finally {
         hideLoading();
         toggleModalButtons('edit-modal', false);
@@ -617,7 +662,8 @@ async function guardarEdicion() {
 }
 
 async function eliminarGasto(id) {
-    if(!confirm("¿Estás seguro de que quieres eliminar este gasto?")) return;
+    const confirmed = await showConfirm("¿Estás seguro de que quieres eliminar este gasto?");
+    if(!confirmed) return;
 
     showLoading();
 
@@ -628,19 +674,21 @@ async function eliminarGasto(id) {
 
         if (response.ok || response.status === 204) {
             document.getElementById('detail-title').textContent = "Selecciona un gasto";
-            document.getElementById('detail-date').textContent = "--/--/----";
+            document.getElementById('detail-date').textContent = "";
+            document.getElementById('detail-date').removeAttribute('datetime');
             document.getElementById('detail-total').textContent = "0,00 €";
             document.getElementById('detail-participants').innerHTML = "";
             const placeholder = document.querySelector('.expense-detail-panel .actions-placeholder');
             if(placeholder) placeholder.innerHTML = '<p class="text-muted">Selecciona un gasto...</p>';
             
-            await initDashboard(); 
+            await initDashboard();
+            await showMessage("Gasto eliminado correctamente.", "Éxito");
         } else {
-            alert("Error al eliminar el gasto.");
+            await showMessage("Error al eliminar el gasto.", "Error");
         }
     } catch (error) {
         console.error(error);
-        alert("Error de conexión.");
+        await showMessage("Error de conexión con el servidor.", "Error");
     } finally {
         hideLoading();
     }
@@ -668,7 +716,7 @@ async function guardarAporte() {
     const amount = parseFloat(document.getElementById('contribution-amount').value);
     
     if (isNaN(amount) || amount <= 0) {
-        alert("Introduce una cantidad válida");
+        await showMessage("Introduce una cantidad válida", "Atención");
         return;
     }
 
@@ -692,16 +740,18 @@ async function guardarAporte() {
         document.getElementById('contribution-modal').close();
         currentContributionData = null;
         
-        await initDashboard(); 
+        await initDashboard();
         
         const tarjeta = document.getElementById(`gasto-${gastoId}`);
         if(tarjeta) {
-            const esMovilExpandido = tarjeta.classList.contains('expanded');
+            const esMovilExpandido = tarjeta.querySelector('details').open;
             await cargarYMostrarDetalles(gastoId, tarjeta, esMovilExpandido);
         }
+        
+        await showMessage("Pago registrado correctamente.", "Éxito");
     } catch (error) {
         console.error(error);
-        alert("Error al conectar con el servidor: " + error.message);
+        await showMessage("Error al conectar con el servidor: " + error.message, "Error");
     } finally {
         hideLoading();
     }
@@ -762,7 +812,6 @@ function setupNavigation() {
     const btnExpenses = document.getElementById('nav-expenses');
     const btnFriends = document.getElementById('nav-friends');
     
-    // Vistas y Paneles
     const viewExpenses = document.getElementById('view-expenses');
     const viewFriends = document.getElementById('view-friends');
     const panelExpenses = document.getElementById('panel-expenses');
@@ -838,34 +887,42 @@ function crearTarjetaAmigo(amigo) {
     }
 
     article.innerHTML = `
-        <header class="card-summary">
-            <div class="friend-icon" aria-hidden="true">👤</div>
-            <div class="expense-details">
-                <h3>${amigo.name}</h3>
+        <details>
+            <summary class="card-summary">
+                <div class="friend-icon" aria-hidden="true">👤</div>
+                <div class="expense-details">
+                    <h3>${amigo.name}</h3>
                 </div>
-            <div class="expense-amount">
-                <span class="price" style="color: ${colorStyle}">${balanceHtml}</span>
-                <span class="status settled">Ver gastos</span>
-            </div>
-        </header>
+                <div class="expense-amount">
+                    <span class="price" style="color: ${colorStyle}">${balanceHtml}</span>
+                    <span class="status settled">Ver gastos</span>
+                </div>
+            </summary>
 
-        <section class="card-details mobile-only">
-            <div class="participants-section">
-                <div class="loading-spinner">Cargando historial...</div>
-            </div>
-        </section>
+            <section class="card-details mobile-only">
+                <div class="participants-section">
+                    <div class="loading-spinner">Cargando historial...</div>
+                </div>
+            </section>
+        </details>
     `;
 
-    article.addEventListener('click', async () => {
-        document.querySelectorAll('#friends-list .expense-card').forEach(c => {
-            c.classList.remove('selected');
-            if(c !== article) c.classList.remove('expanded');
-        });
-        article.classList.add('selected');
-        
-        const isExpanded = article.classList.toggle('expanded');
-
-        await cargarDetalleAmigo(amigo, article, isExpanded);
+    const details = article.querySelector('details');
+    
+    details.addEventListener('toggle', async () => {
+        if (details.open) {
+            document.querySelectorAll('#friends-list .expense-card').forEach(c => {
+                if(c !== article) {
+                    const otherDetails = c.querySelector('details');
+                    if(otherDetails) otherDetails.open = false;
+                }
+                c.classList.remove('selected');
+            });
+            article.classList.add('selected');
+            
+            const isExpanded = details.open;
+            await cargarDetalleAmigo(amigo, article, isExpanded);
+        }
     });
 
     return article;
@@ -1013,6 +1070,8 @@ function irAVerGasto(idGasto) {
         const tarjeta = document.getElementById(`gasto-${idGasto}`);
         if (tarjeta) {
             tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const details = tarjeta.querySelector('details');
+            if(details) details.open = true;
             tarjeta.click();
         }
     }, 100);

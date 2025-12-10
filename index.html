@@ -63,7 +63,8 @@
                         <h2 id="detail-title">Selecciona un gasto</h2>
                         <p class="text-muted">
                             <span id="detail-subtitle">--</span> | 
-                            <time id="detail-date">--/--/----</time>
+                            <!-- FIX: Añadido datetime attribute -->
+                            <time id="detail-date" datetime=""></time>
                         </p>
                     </div>
                 </header>
@@ -217,6 +218,23 @@
                 <button type="submit" class="btn-primary">Confirmar Pago</button>
             </div>
         </form>
+    </dialog>
+
+    <dialog id="message-modal" class="modal-dialog">
+        <h3 id="message-title">Aviso</h3>
+        <p id="message-text"></p>
+        <div class="modal-actions">
+            <button id="message-ok" class="btn-primary">Aceptar</button>
+        </div>
+    </dialog>
+
+    <dialog id="confirm-modal" class="modal-dialog">
+        <h3>Confirmar</h3>
+        <p id="confirm-text"></p>
+        <div class="modal-actions">
+            <button id="confirm-cancel" class="btn-secondary">Cancelar</button>
+            <button id="confirm-ok" class="btn-primary">Aceptar</button>
+        </div>
     </dialog>
     
     <div id="loading-overlay" class="loading-overlay hidden">
