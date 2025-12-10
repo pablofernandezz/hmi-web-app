@@ -298,6 +298,7 @@ function crearTarjetaGasto(gasto) {
 
     const details = article.querySelector('details');
     
+    // Usamos el evento 'toggle' nativo de HTML5
     details.addEventListener('toggle', async () => {
         if (details.open) {
             // Solo en móvil: expandir detalles
@@ -822,6 +823,10 @@ function setupNavigation() {
         btnExpenses.classList.add('active');
         btnFriends.classList.remove('active');
         
+        // ACCESIBILIDAD: Actualizar estado ARIA
+        btnExpenses.setAttribute('aria-selected', 'true');
+        btnFriends.setAttribute('aria-selected', 'false');
+        
         viewExpenses.classList.remove('hidden');
         viewFriends.classList.add('hidden');
         panelExpenses.classList.remove('hidden');
@@ -834,6 +839,11 @@ function setupNavigation() {
         btnFriends.classList.add('active');
         btnExpenses.classList.remove('active');
         
+        // ACCESIBILIDAD: Actualizar estado ARIA
+        btnFriends.setAttribute('aria-selected', 'true');
+        btnExpenses.setAttribute('aria-selected', 'false');
+        
+        // Mostrar/Ocultar vistas
         viewExpenses.classList.add('hidden');
         viewFriends.classList.remove('hidden');
         panelExpenses.classList.add('hidden');
@@ -911,13 +921,11 @@ function crearTarjetaAmigo(amigo) {
     
     details.addEventListener('toggle', async () => {
         if (details.open) {
-            document.querySelectorAll('#friends-list .expense-card').forEach(c => {
-                if(c !== article) {
-                    const otherDetails = c.querySelector('details');
-                    if(otherDetails) otherDetails.open = false;
-                }
-                c.classList.remove('selected');
+            document.querySelectorAll('#friends-list .expense-card details').forEach(d => {
+                if(d !== details) d.open = false;
             });
+            
+            document.querySelectorAll('#friends-list .expense-card').forEach(c => c.classList.remove('selected'));
             article.classList.add('selected');
             
             const isExpanded = details.open;
@@ -999,8 +1007,11 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
                 let claseColor = 'text-muted';
                 
                 if (g.miSaldoNeto > 0.01) {
-                    textoEstado = `Debe ${formatCurrency(g.miSaldoNeto)}`;
+                    textoEstado = `Debes ${formatCurrency(g.miSaldoNeto)}`;
                     claseColor = 'text-danger';
+                } else if (g.miSaldoNeto < -0.01) {
+                    textoEstado = `Te deben ${formatCurrency(Math.abs(g.miSaldoNeto))}`;
+                    claseColor = 'text-success';
                 } else {
                     textoEstado = 'Saldado';
                 }
@@ -1072,7 +1083,8 @@ function irAVerGasto(idGasto) {
             tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
             const details = tarjeta.querySelector('details');
             if(details) details.open = true;
-            tarjeta.click();
+            // No podemos hacer 'click' en details, disparar evento
+            details.dispatchEvent(new Event('toggle'));
         }
     }, 100);
 }

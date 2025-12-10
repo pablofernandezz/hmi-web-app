@@ -12,9 +12,9 @@
     <header class="site-header">
         <div class="container">
             <h1>SplitWithMe 💸</h1>
-            <nav class="view-nav">
-                <button id="nav-expenses" class="nav-tab active">Gastos</button>
-                <button id="nav-friends" class="nav-tab">Amigos</button>
+            <nav class="view-nav" role="tablist" aria-label="Secciones principales">
+                <button id="nav-expenses" class="nav-tab active" role="tab" aria-selected="true" aria-controls="view-expenses">Gastos</button>
+                <button id="nav-friends" class="nav-tab" role="tab" aria-selected="false" aria-controls="view-friends">Amigos</button>
             </nav>
         </div>
     </header>
@@ -23,16 +23,16 @@
         
         <div class="master-column">
             
-            <div id="view-expenses">
+            <div id="view-expenses" role="tabpanel" aria-labelledby="nav-expenses">
                 <section class="summary">
                     <h2 class="visually-hidden">Resumen de Cuentas</h2>
                     <div class="summary-card total">
                         <p>Gasto Total</p>
-                        <p class="amount" id="dashboard-total">--</p>
+                        <p class="amount" id="dashboard-total">-- €</p>
                     </div>
-                    <div class="summary-card balance negative">
-                        <p>Te deben</p>
-                        <p class="amount" id="dashboard-balance">--</p>
+                    <div class="summary-card balance">
+                        <p>Balance Global</p>
+                        <p class="amount" id="dashboard-balance">-- €</p>
                     </div>
                 </section>
 
@@ -44,7 +44,7 @@
                 </section>
             </div>
 
-            <div id="view-friends" class="hidden">
+            <div id="view-friends" class="hidden" role="tabpanel" aria-labelledby="nav-friends">
                 <section class="expenses-list">
                     <h2>Mis Amigos</h2>
                     <div id="friends-list">
@@ -56,15 +56,15 @@
         </div>
 
         <section id="panel-expenses" class="expense-detail-panel desktop-only">
+            <h2 class="visually-hidden">Panel de Detalle de Gasto</h2>
             <div class="detail-container">
                 <header class="detail-header">
                     <div class="expense-icon-large" aria-hidden="true">📝</div>
                     <div>
-                        <h2 id="detail-title">Selecciona un gasto</h2>
+                        <h3 id="detail-title">Selecciona un gasto</h3>
                         <p class="text-muted">
                             <span id="detail-subtitle">--</span> | 
-                            <!-- FIX: Añadido datetime attribute -->
-                            <time id="detail-date" datetime=""></time>
+                            <time id="detail-date"></time>
                         </p>
                     </div>
                 </header>
@@ -99,11 +99,12 @@
         </section>
 
         <section id="panel-friends" class="expense-detail-panel desktop-only hidden">
+            <h2 class="visually-hidden">Panel de Detalle de Amigo</h2>
             <div class="detail-container">
                 <header class="detail-header">
                     <div class="expense-icon-large" aria-hidden="true" style="background:#e3f2fd;">👤</div>
                     <div>
-                        <h2 id="friend-detail-name">Selecciona un amigo</h2>
+                        <h3 id="friend-detail-name">Selecciona un amigo</h3>
                     </div>
                 </header>
 
@@ -135,32 +136,27 @@
         <span style="font-size: 1.5rem; line-height: 1;">+</span> Nuevo Gasto
     </button>
 
-    <dialog id="add-modal" class="modal-dialog">
+    <dialog id="add-modal" class="modal-dialog" aria-labelledby="title-add-modal">
         <form id="add-form">
-            <h3>Nuevo Gasto</h3>
-            
+            <h3 id="title-add-modal">Nuevo Gasto</h3>
             <div class="form-group">
                 <label for="add-desc">Concepto</label>
                 <input type="text" id="add-desc" required placeholder="Ej: Taxi aeropuerto...">
             </div>
-
             <div class="form-group">
                 <label for="add-amount">Importe (€)</label>
-                <input type="number" id="add-amount" step="0.01" min="0.01" required placeholder="0.00">
+                <input type="number" id="add-amount" step="5" min="0.01" required placeholder="0.00">
             </div>
-
             <div class="form-group">
                 <label for="add-date">Fecha</label>
                 <input type="date" id="add-date" required>
             </div>
-
             <div class="form-group">
                 <label>Participantes</label>
                 <div id="add-friends-list" class="friends-grid">
                     <p class="text-muted">Cargando amigos...</p>
                 </div>
             </div>
-
             <div class="modal-actions">
                 <button type="button" id="btn-cancel-add" class="btn-secondary">Cancelar</button>
                 <button type="submit" class="btn-primary">Crear Gasto</button>
@@ -168,25 +164,21 @@
         </form>
     </dialog>
 
-    <dialog id="edit-modal" class="modal-dialog">
+    <dialog id="edit-modal" class="modal-dialog" aria-labelledby="title-edit-modal">
         <form id="edit-form">
-            <h3>Editar Gasto</h3>
-            
+            <h3 id="title-edit-modal">Editar Gasto</h3>
             <div class="form-group">
                 <label for="edit-desc">Concepto</label>
                 <input type="text" id="edit-desc" required placeholder="Ej: Cena...">
             </div>
-
             <div class="form-group">
                 <label for="edit-amount">Importe (€)</label>
-                <input type="number" id="edit-amount" step="0.01" min="0.01" required>
+                <input type="number" id="edit-amount" step="5" min="0.01" required>
             </div>
-
             <div class="form-group">
                 <label for="edit-date">Fecha</label>
                 <input type="date" id="edit-date" required>
             </div>
-
             <div class="form-group">
                 <label>Participantes</label>
                 <div id="edit-friends-list" class="friends-grid">
@@ -194,7 +186,6 @@
                 </div>
                 <p class="small-info">* No puedes eliminar amigos que ya han pagado.</p>
             </div>
-
             <div class="modal-actions">
                 <button type="button" id="btn-cancel-edit" class="btn-secondary">Cancelar</button>
                 <button type="submit" class="btn-primary">Guardar Cambios</button>
@@ -202,17 +193,15 @@
         </form>
     </dialog>
 
-    <dialog id="contribution-modal" class="modal-dialog">
+    <dialog id="contribution-modal" class="modal-dialog" aria-labelledby="title-contribution-modal">
         <form id="contribution-form">
-            <h3>Registrar Aporte</h3>
+            <h3 id="title-contribution-modal">Registrar Aporte</h3>
             <p id="contribution-subtitle" class="text-muted" style="margin-bottom: 1rem;">--</p>
-            
             <div class="form-group">
                 <label for="contribution-amount">Cantidad a pagar (€)</label>
-                <input type="number" id="contribution-amount" step="0.01" min="0.01" required>
+                <input type="number" id="contribution-amount" step="5" min="0.01" required>
                 <p class="small-info">Máximo pendiente: <span id="max-contribution">0.00</span> €</p>
             </div>
-
             <div class="modal-actions">
                 <button type="button" id="btn-cancel-contribution" class="btn-secondary">Cancelar</button>
                 <button type="submit" class="btn-primary">Confirmar Pago</button>
@@ -220,16 +209,16 @@
         </form>
     </dialog>
 
-    <dialog id="message-modal" class="modal-dialog">
-        <h3 id="message-title">Aviso</h3>
+    <dialog id="message-modal" class="modal-dialog" aria-labelledby="title-message-modal">
+        <h3 id="title-message-modal">Aviso</h3>
         <p id="message-text"></p>
         <div class="modal-actions">
             <button id="message-ok" class="btn-primary">Aceptar</button>
         </div>
     </dialog>
 
-    <dialog id="confirm-modal" class="modal-dialog">
-        <h3>Confirmar</h3>
+    <dialog id="confirm-modal" class="modal-dialog" aria-labelledby="title-confirm-modal">
+        <h3 id="title-confirm-modal">Confirmar</h3>
         <p id="confirm-text"></p>
         <div class="modal-actions">
             <button id="confirm-cancel" class="btn-secondary">Cancelar</button>
