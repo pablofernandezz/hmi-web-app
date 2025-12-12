@@ -24,13 +24,13 @@
         <div class="master-column">
             
             <div id="view-expenses" role="tabpanel" aria-labelledby="nav-expenses">
-                <section class="summary">
+                <section class="summary" aria-label="Resumen financiero">
                     <h2 class="visually-hidden">Resumen de Cuentas</h2>
-                    <div class="summary-card total">
+                    <div class="summary-card total" aria-live="polite" aria-atomic="true">
                         <p>Gasto Total</p>
                         <p class="amount" id="dashboard-total">-- €</p>
                     </div>
-                    <div class="summary-card balance">
+                    <div class="summary-card balance" aria-live="polite" aria-atomic="true">
                         <p>Balance Global</p>
                         <p class="amount" id="dashboard-balance">-- €</p>
                     </div>
@@ -226,8 +226,8 @@
         </div>
     </dialog>
     
-    <div id="loading-overlay" class="loading-overlay hidden">
-        <div class="spinner"></div>
+    <div id="loading-overlay" class="loading-overlay hidden" role="alert" aria-label="Cargando contenido">
+        <div class="spinner" aria-hidden="true"></div>
         <p>Procesando...</p>
     </div>
 

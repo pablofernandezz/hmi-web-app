@@ -310,8 +310,11 @@ function crearTarjetaGasto(gasto) {
             if (window.innerWidth >= 1024) {
                 document.querySelectorAll('.expense-card').forEach(c => {
                     c.classList.remove('selected');
+                    c.removeAttribute('aria-current'); 
                 });
                 article.classList.add('selected');
+                article.setAttribute('aria-current', 'true'); 
+                
                 await cargarYMostrarDetalles(gasto.id, article, false);
             }
         }
