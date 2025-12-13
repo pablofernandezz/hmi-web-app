@@ -11,7 +11,7 @@ let listaGastosCache = [];
 function showMessage(message, title = 'Aviso') {
     return new Promise((resolve) => {
         const modal = document.getElementById('message-modal');
-        document.getElementById('message-title').textContent = title;
+        document.getElementById('title-message-modal').textContent = title;
         document.getElementById('message-text').textContent = message;
         
         const btnOk = document.getElementById('message-ok');
