@@ -107,3 +107,48 @@
     *   **Utilidad y aplicación a la práctica:** Apoyo para consultar dudas puntuales, algunas correcciones en el código,...
 
 ---
+
+## Objetivos de aprendizaje de la semana 3
+
+---
+
+-   **Concepto: Aplicación de normas WAI-ARIA en interfaces dinámicas**
+
+    El objetivo principal fue que las pestañas, listas dinámicas... aplicadas en la tarea anterior sean comprensibles para tecnologías de asistencia. Se implementaron roles, estados y propiedades.
+    
+    **Recursos identificados para su estudio:**
+
+    *   MDN Web Docs: Documentación sobre atributos ARIA y correcta implementación en HTML.
+    *   W3C WAI-ARIA APG: Patrones de diseño para pestañas y diálogos.
+
+-   **Concepto: Live Regions y Feedback dinámico**
+
+    Gestión de notificaciones y cambios de contenido sin recargar la página para lectores de pantalla. Se implementó, por ejemplo, aria-live = "polite" en dashboard para cambios en los totales.
+
+    **Recursos identificados para su estudio:**
+
+    *   WCAG: Criterios sobre cambios de contexto e identificación de errores.
+    *   Web.dev: Guías sobre cómo hacer anuncios accesibles en JavaScript.
+
+---
+
+## Recursos empleados en la semana 3
+
+---
+
+-   **Recurso: Inspector de accesibilidad del navegador**
+
+    *   **Descripción:** Herramienta integrativa en DevTools que permite visualizar el Árbol de Accesibilidad en lugar de DOM.
+    *   **Utilidad y aplicación a la práctica:** Fundamental para verificar que los atributos aria se aplican correctamente y que los lectores de pantalla interpretarían los nombres accesibles de forma adecuada.
+
+-   **Recurso: Elementos Semánticos Nativos (HTML5)**
+
+    *   **Descripción:** Uso de etiquetas estándar que incluyen comportamiento de accesibilidad por defecto.
+    *   **Utilidad y aplicación a la práctica:** Reducir la necesidad de ARIA manual, por ejemplo, al usar <details> para el acordeón móvil, se simplifica el código y mejora la robustez al gestionar el navegador automáticamente el estado de expansión.
+
+-   **Recurso: Gemini (IA Generativa)**
+
+    *   **Descripción:** Modelo de lenguaje grande desarrollado por Google, utilizado como asistente de desarrollo y conceptualización.
+    *   **Utilidad y aplicación a la práctica:** Apoyo para implementar JavaScript en la actualización de atributos ARIA dinámicamente, dudas puntuales...
+
+---
