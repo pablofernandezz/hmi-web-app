@@ -49,10 +49,6 @@ Al cierre de la semana 1, el repositorio se encuentra en un estado estable y con
   * **Simulación de Interactividad (CSS puro):** Se ha implementado una lógica de visualización mediante clases (`mobile-only`, `desktop-only`, `expanded`) que permite mostrar los detalles de un gasto desplegados dentro de la tarjeta en versión móvil, y en un panel lateral fijo en la versión de escritorio, sin utilizar JavaScript.
   * **Informe de Datos:** Visualización estática de un historial de gastos con datos ficticios coherentes, incluyendo importes, fechas, estados (pendiente/saldado) y participantes.
 
-# Informe del Facilitador-Administrador
-
-A continuación se ofrece una plantilla del informe que debe generar la persona encargada de este role cada semana.
-
 ## Registro de tareas llevadas a cabo durante la semana 2
 
 **Tarea 1: Integración de Lógica Dinámica y Conexión con API**
@@ -107,3 +103,55 @@ Al cierre de la semana 2, el repositorio ha migrado de ser una estructura purame
   * **Gestión Avanzada de Gastos:** Capacidad para crear nuevos gastos y editar los existentes mediante formularios modales que permiten modificar concepto, importe, fecha y la lista de participantes activos.
   * **Sincronización de Interfaz:** Actualización inmediata de los totales, listas y paneles de detalle tras realizar operaciones de modificación o borrado, sin necesidad de recargar la página completa.
   * **Feedback de Usuario:** Implementación de pantallas de carga "Procesando..." para mejorar la percepción de rendimiento durante las peticiones al servidor.
+
+## Registro de tareas llevadas a cabo durante la semana 3
+
+**Tarea 1: Auditoría de Accesibilidad y Cumplimiento WAI-ARIA**
+
+* **Descripción de la tarea:** Se ha realizado la validación final de la interfaz para asegurar el cumplimiento de las pautas de accesibilidad WCAG 2.1 (Nivel AA). Se han ejecutado pruebas exploratorias manuales centradas en la navegación por teclado, la semántica para lectores de pantalla y la gestión del foco. Basándose en los resultados, se han aplicado correcciones en el código HTML, CSS y JS para subsanar barreras de interacción y mejorar la robustez de la aplicación.
+* **Asignación de responsables:** Tarea conjunta del equipo de desarrollo.
+* **Estado de completud:** 100% Completado.
+* **Conflictos, desviaciones, etc.:**
+    * **Validación de Datos:** Se detectó un error crítico de usabilidad donde los campos numéricos con `step="5"` rechazaban importes decimales válidos (ej. 18,20 €). Se corrigió estableciendo la precisión a `0.01`.
+    * **Visibilidad del Foco:** El indicador de foco nativo del navegador quedaba recortado en las tarjetas de gastos. Se solucionó implementando estilos CSS de alto contraste (`outline-offset`).
+    * **Gestión de Errores:** Un fallo en la referencia de IDs del DOM impedía que los modales de error se mostraran, bloqueando la interacción. Fue corregido para garantizar que el usuario reciba feedback y el foco se gestione correctamente.
+
+## Estado del repositorio en la semana 3
+
+Al cierre de la semana 3, el repositorio contiene la versión final de la aplicación, completamente funcional, validada y documentada, cumpliendo con todos los requisitos de diseño, interactividad y accesibilidad del enunciado.
+
+* **Estructura de Ficheros Relevante:**
+
+```text
+.
+├── css/
+│   └── styles.css
+├── informes/
+│   ├── informe-del-analista.md
+│   ├── informe-del-curador.md
+│   └── informe-del-facilitador.md
+├── js/
+│   └── main.js
+├── diseno_ui_BonJovi.pdf
+├── enunciado.md
+├── index.htmld
+├── InformeAccesibilidad.md
+├── LICENSE
+├── life-b4-autocad.jpeg
+├── README.md
+└── roles.md
+└── rubricas.md
+````
+* **Artefactos Entregados:**
+
+  * **`InformeAccesibilidad.md`**: Documento detallado que recoge la metodología de pruebas, los resultados de la validación (Navegación, Semántica, Feedback) y las correcciones aplicadas. Certifica que la aplicación es operable por teclado y tecnologías de asistencia.
+  * **Código Fuente Optimizado**:
+      * **`index.html`**: Formularios ajustados con atributos `step="0.01"` y etiquetas ARIA (`aria-live`, `role="alert"`) verificadas.
+      * **`css/styles.css`**: Reglas añadidas para garantizar la visibilidad del foco en todos los elementos interactivos.
+      * **`js/main.js`**: Implementación de "Focus Trapping" en modales y corrección de bugs en la visualización de alertas.
+
+* **Resumen de Funcionalidades Implementadas:**
+
+  * **Accesibilidad Universal:** La interfaz es completamente navegable utilizando únicamente el teclado, respetando el orden lógico y la gestión del foco en ventanas emergentes.
+  * **Robustez en la Entrada de Datos:** Se ha garantizado que el usuario pueda introducir cualquier importe válido sin errores de validación del navegador.
+  * **Feedback Semántico:** Los cambios de estado (carga, errores, actualización de saldos) se comunican programáticamente a los lectores de pantalla mediante atributos estándar.
