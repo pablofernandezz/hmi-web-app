@@ -48,18 +48,16 @@ Las pruebas se han realizado siguiendo una estrategia exploratoria manual centra
 
 Durante la fase de validación se detectaron y corrigieron los siguientes puntos:
 
-1.  **Validación de Formularios (Inputs Numéricos):** Inicialmente, los campos de importe tenían un atributo `step="5"`, lo que impedía a los usuarios introducir cantidades decimales exactas (ej. 18,20 €) y generaba errores de validación confusos. Se corrigió estableciendo `step="0.01"` en todos los formularios para permitir una entrada de datos precisa y accesible.
+1.  **Lectura de iconos:** Inicialmente el lector de pantalla leía además del texto los iconos como el lápiz del botón de editar o la papelera del botón de eliminar, este error lo solucionamos envolviendo estos iconos con `<span aria-hidden="true">` haciéndolos invisibles para el lector de pantalla.
 
-2.  **Gestión del Foco en Actualizaciones:** Se identificó que, al guardar un gasto o editarlo, la lista completa se regeneraba, provocando que el usuario perdiera la posición del foco si estaba navegando con teclado. Se ha mitigado forzando el foco de vuelta al elemento editado o al contenedor principal tras la recarga, mejorando la continuidad en la navegación por teclado.
+2.  **Gestión del Foco en Actualizaciones:** Nos dimos cuneta de que al guardar un gasto o editarlo, la lista completa se regeneraba, provocando que el usuario perdiera la posición del foco si estaba navegando con teclado. Lo solucionamos forzando el foco de vuelta al elemento editado o al contenedor principal tras la recarga, mejorando la continuidad en la navegación por teclado.
 
-3.  **Depuración de Feedback de Errores:** Durante las pruebas de validación, se detectó que el modal de aviso no se desplegaba al intentar crear un gasto sin participantes, impidiendo el feedback al usuario. El error se debía a una discrepancia entre el identificador del título en el HTML (`title-message-modal`) y la referencia en el JavaScript (`message-title`). Se corrigió el selector en el código para restaurar la funcionalidad y garantizar que el foco se mueva correctamente al mensaje de error.
+3.  **Depuración de Feedback de Errores:** Durante las pruebas de validación, detectamos que el modal de aviso no se desplegaba al intentar crear un gasto sin participantes, impidiendo el feedback al usuario. El error se debía a una discrepancia entre el identificador del título en el HTML (`title-message-modal`) y la referencia en el JavaScript (`message-title`). Se corrigió el selector en el código para arreglar la funcionalidad y garantizar que el foco se mueva correctamente al mensaje de error.
 
 ## Conclusión
 
-La aplicación **SplitWithMe** ha superado satisfactoriamente las pruebas exploratorias de accesibilidad, cumpliendo con los requisitos WAI-ARIA y las pautas WCAG 2.1 (Nivel AA) establecidas para esta práctica.
+Una vez correjidos estos errores la aplicación ya es completamente accesible y ofrece mucho más feedback al usuario que antes, respetando los estándares web modernos sin dependencias externas.
 
-El análisis confirma que la decisión de utilizar **HTML5 semántico nativo** (elementos `<dialog>`, `<details>`, `<time>`, `<main>`, `<nav>`) en lugar de emulaciones con JavaScript ha sido clave para garantizar una experiencia robusta y accesible "out-of-the-box". La navegación por teclado es fluida, cíclica y lógica, y la gestión del foco en ventanas modales impide errores de interacción.
+Despues de realizar estas pruebas podemos afirmar que utilizar **HTML5 semántico nativo** (elementos `<dialog>`, `<details>`, `<time>`, `<main>`, `<nav>`) en lugar de emulaciones con JavaScript ha sido útil para dar una experiencia de usuario práctica y accesible "out-of-the-box". La navegación por teclado es fluida, cíclica y lógica, y la gestión del foco en ventanas modales impide errores de interacción.
 
 Asimismo, la implementación de atributos ARIA dinámicos (`aria-live`, `aria-selected`, `role="alert"`) asegura que los usuarios de tecnologías de asistencia reciban feedback inmediato sobre los cambios en la interfaz (carga, errores, actualización de saldos).
-
-Tras la corrección de los problemas de validación numérica y la depuración de los identificadores en los modales de error, la aplicación se considera apta para su uso por personas con diversidad funcional, respetando los estándares web modernos sin dependencias externas.

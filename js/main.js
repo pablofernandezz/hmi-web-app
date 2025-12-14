@@ -377,7 +377,7 @@ function generarItemsParticipantes(participantes, gastoId = null) {
              
              if (gastoId) {
                  const nombreSafe = p.name.replace(/'/g, "\\'");
-                 botonPagarHtml = `<button class="btn-pay" onclick="abrirModalAporte(${gastoId}, ${p.id}, '${nombreSafe}', ${deudaNeta})">💸 Pagar</button>`;
+                 botonPagarHtml = `<button class="btn-pay" onclick="abrirModalAporte(${gastoId}, ${p.id}, '${nombreSafe}', ${deudaNeta})"> <span aria-hidden="true">💸</span> Pagar</button>`;
              }
 
         } else {
@@ -427,8 +427,8 @@ function generarHtmlDetalles(id, total, pagado, pendiente, participantes) {
         </div>
         
         <div class="actions-container">
-            <button class="btn-action btn-edit" onclick="abrirModalEdicion(${id})">✏️ Editar</button>
-            <button class="btn-action btn-delete" onclick="eliminarGasto(${id})">🗑️ Eliminar</button>
+            <button class="btn-action btn-edit" onclick="abrirModalEdicion(${id})"> <span aria-hidden="true">✏️</span> Editar</button>
+            <button class="btn-action btn-delete" onclick="eliminarGasto(${id})"> <span aria-hidden="true">🗑️</span> Eliminar</button>
         </div>
     `;
 }
@@ -459,8 +459,8 @@ function renderizarPanelEscritorio(gasto, total, pagado, pendiente, participante
     if(actionsPlaceholder) {
         actionsPlaceholder.innerHTML = `
             <div class="actions-container">
-                <button class="btn-action btn-edit" onclick="abrirModalEdicion(${gasto.id})">✏️ Editar</button>
-                <button class="btn-action btn-delete" onclick="eliminarGasto(${gasto.id})">🗑️ Eliminar gasto</button>
+                <button class="btn-action btn-edit" onclick="abrirModalEdicion(${gasto.id})"> <span aria-hidden="true">✏️</span> Editar</button>
+                <button class="btn-action btn-delete" onclick="eliminarGasto(${gasto.id})"> <span aria-hidden="true">🗑️</span> Eliminar</button>
             </div>
         `;
     }
@@ -1034,7 +1034,7 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
                     </div>
                     <div style="text-align:right;">
                         <button class="btn-view-detail" onclick="irAVerGasto(${g.id})">
-                            👁️ Ver
+                            <span aria-hidden="true">👁️</span> Ver
                         </button>
                     </div>
                 </li>`;

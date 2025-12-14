@@ -93,3 +93,52 @@
 
   **h) ¿Cómo se relaciona ESTE contenido con otros del curso y con tu titulación?**
   Esta semana conecta directamente con asignaturas de **Internet y Sistemas Distribuidos** (consumo de APIs REST). Hemos puesto en práctica el ciclo completo de una aplicación web: Backend (Python/API) <-> Frontend (HTML/JS), entendiendo cómo viajan y se transforman los datos entre capas.
+
+
+  ---
+
+## Evaluación final de la semana 3
+
+   - **Nicolás Domínguez Souto (Administrador)**
+   
+     - **4**
+	 
+	 - Se encargó principalmete de ejecutar las pruebas definidas en el informe de accesibilidad y solucionó los errores que detectó durante las pruebas.
+
+   - **Joel Ramos Carro (Curador)**
+    
+     - **4**
+   
+     - Se encargó de modificar la implementación para corregir los fallos de accesibilidad. Entre otras cosas sustituyó los `alert()` y `confirm()` de JavaScript por los elementos `<dialog>` nativos y aplicar los estilos CSS necesarios para los estados de foco, permitiendo que la aplicación pasara las validaciones.
+
+   - **Pablo Fernández Martí (Analista - Yo)**
+
+     - **4**
+
+     - Me encargué de crear el plan de pruebas accesibilidad. También probé en rasgos generales que funcionasen los cambios realizados para mejorar la accesibilidad. Finalmente generé un informe de Lighthouse de Google Chrome para conocer el % de accesibilidad de nuestra aplicación web, obteniendo un 96%, el único fallo relevante fue el poco contraste de los colores de fondo.
+
+## Retrospectiva de la semana 3
+
+  **a) ¿Qué ha sido lo mejor de la práctica?**
+  Descubrir la potencia del HTML semántico nativo. Descubrimos cómo al usar simplemente etiquetas estándar como `<details>`, `<summary>` y `<dialog>`, obtenemos muchísimas funcionalidades de accesibilidad (trampas de foco, navegación por teclado, lectura de pantalla) que de otra forma requerirían mucho JavaScript complejo.
+  
+  **b) ¿Qué fue lo peor?**
+  Darnos cuenta tarde de que algunas decisiones de diseño visual (como tener que envolver todos los iconos para que el lector de pantalla los ignorase) estaban rompiendo la accesibilidad para usuarios de teclado añadiendo ruido innecesario. Fue un error "silencioso" que no vimos hasta que hicimos las pruebas de esta semana.
+
+  **c) ¿Cuál fue el mejor momento de cada semana durante el trabajo del equipo?**
+  Cuando reemplazar todas las ventanas de `alert()` y `confirm()` del navegador (que bloquean la ejecución y son feas) por nuestros propios modales `<dialog>` personalizados. La aplicación pasó de sentirse como un proyecto básico a una aplicación web profesional.
+
+  **d) ¿Cuál ha sido el peor?**
+  El proceso de ajustar los atributos ARIA (`aria-labelledby`, `aria-describedby`) para que los lectores de pantalla leyeran exactamente lo que queríamos. A veces es confuso saber qué atributo usar para cada caso y tuvimos que probar varias veces hasta que el flujo de información auditiva tuvo sentido.
+
+  **e) ¿Qué has aprendido?**
+  Que la accesibilidad no es una "capa extra" que se añade al final, sino una base que debe estar desde el principio. He aprendido a usar herramientas de validación (como Lighthouse y navegación por teclado) y a entender las pautas WCAG, no solo como una norma a cumplir, sino como una forma de mejorar la experiencia para todos los usuarios.
+
+  **f) ¿Qué necesitáis conservar -como equipo- para las próximas semanas?**
+  La capacidad de refactorizar código existente sin miedo. Esta semana tuvimos que reescribir gran parte de la lógica de interacción (borrar y crear gastos) para adaptarla a los nuevos estándares de accesibilidad.
+
+  **g) ¿Qué tenéis que mejorar -como equipo- para las próximas semanas?**
+  Aunque esta es la última práctica, como lección aprendida nos llevamos que debemos planearlo todo mejor: integrar las pruebas (de accesibilidad y funcionales) mucho antes en el desarrollo. Si hubiéramos validado el HTML semántico en la Semana 1, nos habríamos ahorrado trabajo de reescritura en la Semana 3.
+
+  **h) ¿Cómo se relaciona ESTE contenido con otros del curso y con tu titulación?**
+  Esta práctica es la culminación de la asignatura de **Interfaces Persona-Máquina**, aplicando directamente los principios de Diseño Universal y Accesibilidad. Éticamente, como futuros ingenieros, aprendemos que el software debe ser inclusivo y no discriminar a usuarios por sus capacidades, lo cual es un punto fundamental de la responsabilidad social en la ingeniería informática.
