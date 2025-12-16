@@ -507,8 +507,7 @@ function renderizarPanelEscritorio(gasto, total, pagado, pendiente, participante
     const fechaObj = new Date(gasto.date);
     const timeEl = document.getElementById('detail-date');
     timeEl.textContent = fechaObj.toLocaleDateString('es-ES', { dateStyle: 'long' });
-    timeEl.setAttribute('datetime', gasto.date);
-    
+        
     const sub = document.getElementById('detail-subtitle');
     if(sub) sub.textContent = "Detalle del gasto";
 
