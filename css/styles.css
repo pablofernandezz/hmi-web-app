@@ -9,7 +9,7 @@
     --text-muted: #666;
     --danger: #dc3545;
     --success: #28a745;
-    --border-color: #ccc; /* Gris más visible para bordes */
+    --border-color: #ccc;
     --border-light: #e0e0e0;
     --spacing: 1rem;
     --radius: 12px;
@@ -97,7 +97,6 @@ body {
 
 .summary-card.negative .amount { color: var(--danger); }
 
-
 /* =========================================
    4. LISTA DE GASTOS (TARJETAS)
    ========================================= */
@@ -118,12 +117,10 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     margin-bottom: 1.5rem;
     border: 1px solid var(--border-color);
-    /* Borde transparente a la izquierda para evitar saltos al expandir */
-    border-left: 5px solid transparent; 
+    border-left: 5px solid transparent;
     overflow: hidden;
     transition: all 0.2s ease;
     cursor: pointer;
-    padding: 0; /* Sin padding contenedor para que los hijos llenen el espacio */
 }
 
 .expense-card:hover {
@@ -131,7 +128,6 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* ESTADO EXPANDIDO (Activo en Móvil/Tablet) */
 .expense-card.expanded {
     border-left-color: var(--primary-color);
     background-color: #fff;
@@ -144,6 +140,11 @@ body {
     gap: 1rem;
     padding: 1.2rem;
     background-color: #fff;
+    width: 100%;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .expense-icon {
@@ -177,6 +178,14 @@ body {
 .status.pending { background-color: #fff3cd; color: #856404; }
 .status.settled { background-color: #d4edda; color: #155724; }
 
+.expand-icon {
+    margin-left: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.expense-card.expanded .expand-icon {
+    transform: rotate(90deg);
+}
 
 /* =========================================
    5. DETALLES DEL GASTO (ACORDEÓN)
@@ -186,12 +195,10 @@ body {
     border-top: 1px solid var(--border-light);
     padding: 1rem;
     font-size: 0.9rem;
-    
-    display: none; 
+    display: none;
     animation: fadeIn 0.3s ease;
 }
 
-/* REGLA: Mostrar detalles cuando la tarjeta tiene la clase .expanded */
 .expense-card.expanded .card-details {
     display: block;
 }
@@ -234,40 +241,31 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-
 /* =========================================
    6. MEDIA QUERIES (ADAPTATIVO)
    ========================================= */
-
-/* TABLET (Entre 768px y 1023px) */
 @media (min-width: 768px) {
-    /* el resumen pasa a horizontal */
     .summary {
         flex-direction: row;
     }
     .summary-card { flex: 1; }
 
-    /* grid de 2 columnas (gastos y amigos) */
     #expenses-list,
     #friends-list { 
         display: grid;
-        grid-template-columns: repeat(2, 1fr); /* 2 Columnas iguales */
+        grid-template-columns: repeat(2, 1fr);
         gap: 1.5rem;
         align-items: start;
     }
 }
 
-
-/* DESKTOP (Más de 1024px) */
 @media (min-width: 1024px) {
-    /* Ocultamos detalles internos de móvil */
     .mobile-only { display: none !important; }
     .desktop-only { display: block; }
 
-    /* Layout principal de dos paneles */
     .dashboard-grid {
         display: grid;
-        grid-template-columns: 350px 1fr; /* Lista izq / Detalle dcha */
+        grid-template-columns: 350px 1fr;
         gap: 3rem;
         align-items: start;
     }
@@ -278,25 +276,22 @@ body {
         min-height: 0; 
     }
 
-    /* En desktop, el resumen vuelve a vertical */
     .summary {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
     }
     
-    /* Volvemos a 1 columna porque las listas están en un panel lateral estrecho */
     #expenses-list,
     #friends-list { 
         display: block; 
     }
     
     .expense-card, 
-    .friend-card { /* Asumiendo que las tarjetas de amigos tienen esta clase */
+    .friend-card {
         margin-bottom: 1rem;
     }
 
-    /* Estilo para tarjeta seleccionada */
     .expense-card.selected,
     .friend-card.selected {
         border-color: var(--primary-color);
@@ -304,7 +299,6 @@ body {
         background-color: #f0f7ff;
     }
 
-    /* Panel derecho fijo */
     .expense-detail-panel {
         background: var(--card-bg);
         border-radius: var(--radius);
@@ -315,7 +309,6 @@ body {
         top: 6rem;
     }
 
-    /* Estilos del panel derecho */
     .detail-header {
         display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;
         border-bottom: 1px solid var(--border-light); padding-bottom: 1.5rem;
@@ -334,7 +327,7 @@ body {
     display: flex;
     gap: 1rem;
     margin-top: 1.5rem;
-    justify-content: flex-end; /* Alineados a la derecha */
+    justify-content: flex-end;
 }
 
 .btn-action {
@@ -352,7 +345,7 @@ body {
 }
 
 .btn-edit {
-    background-color: #e9ecef; /* Gris claro */
+    background-color: #e9ecef;
     color: var(--text-main);
     border: 1px solid var(--border-color);
 }
@@ -361,7 +354,7 @@ body {
 }
 
 .btn-delete {
-    background-color: #ffebee; /* Rojo muy claro */
+    background-color: #ffebee;
     color: var(--danger);
     border: 1px solid #ffc9c9;
 }
@@ -379,10 +372,9 @@ dialog.modal-dialog {
     width: 90%;
     max-width: 400px;
     background: white;
-    margin: auto; /* Centrado automático */
+    margin: auto;
 }
 
-/* Fondo oscuro detrás del modal */
 dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
@@ -431,37 +423,31 @@ dialog::backdrop {
 .btn-secondary:hover { background-color: #dae0e5; }
 
 /* =========================================
-   8. BOTÓN FLOTANTE (FAB) - TAREA 3
+   8. BOTÓN FLOTANTE (FAB)
    ========================================= */
 .fab-btn {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    
     background-color: var(--primary-color);
     color: white;
     border: none;
     border-radius: 50px;
     padding: 16px 24px;
-    
-    /* Texto e Icono */
     font-size: 1rem;
-    font-weight: 700; /* Letra negrita */
+    font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 10px; /* Espacio entre el + y el texto */
-    
-    /* Sombra elegante azulada */
+    gap: 10px;
     box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
-    
     cursor: pointer;
     z-index: 1000;
     transition: all 0.3s ease;
 }
 
 .fab-btn:hover {
-    background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
-    transform: translateY(-3px); /* Se eleva un poco */
+    background-color: #0056b3;
+    transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
 }
 
@@ -469,7 +455,14 @@ dialog::backdrop {
     transform: translateY(0);
 }
 
-/* --- Estilos para el selector de amigos en modales --- */
+.fab-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+/* =========================================
+   9. SELECTOR DE AMIGOS EN MODALES
+   ========================================= */
 .friends-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -503,7 +496,6 @@ dialog::backdrop {
     cursor: pointer;
 }
 
-/* Estilo para cuando el checkbox está deshabilitado (ya pagó) */
 .friend-checkbox.disabled {
     opacity: 0.6;
     background-color: #e9ecef;
@@ -518,33 +510,30 @@ dialog::backdrop {
 }
 
 /* =========================================
-   10. INDICADOR DE CARGA NO BLOQUEANTE
+   10. INDICADOR DE CARGA
    ========================================= */
 .loading-overlay {
     position: fixed;
-    bottom: 30px;        /* Abajo */
-    left: 30px;          /* Izquierda (para no tapar el botón Nuevo Gasto) */
-    width: auto;         /* Tamaño automático */
+    bottom: 30px;
+    left: 30px;
+    width: auto;
     height: auto;
-    background-color: #333; /* Fondo oscuro elegante */
+    background-color: #333;
     color: white;
     padding: 12px 24px;
-    border-radius: 50px; /* Bordes redondeados */
+    border-radius: 50px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    
     display: flex;
     align-items: center;
     gap: 15px;
-    
     z-index: 9999;
     transition: transform 0.3s ease, opacity 0.3s ease;
-    
-    pointer-events: none; /* Permite hacer clic "a través" de él si molesta */
+    pointer-events: none;
 }
 
 .loading-overlay.hidden {
     opacity: 0;
-    transform: translateY(20px); /* Se esconde bajando */
+    transform: translateY(20px);
 }
 
 .loading-overlay p {
@@ -554,7 +543,6 @@ dialog::backdrop {
     color: white;
 }
 
-/* Spinner más pequeño y blanco */
 .spinner {
     width: 20px;
     height: 20px;
@@ -572,7 +560,6 @@ dialog::backdrop {
 /* =========================================
    11. NAVEGACIÓN Y VISTAS DE AMIGOS
    ========================================= */
-
 .view-nav {
     display: flex;
     justify-content: center;
@@ -662,53 +649,31 @@ dialog::backdrop {
     transform: translateY(0);
 }
 
-/* =========================================
-   12. ESTILOS PARA DETAILS/SUMMARY (Elementos semánticos)
-   ========================================= */
+.text-muted { color: var(--text-muted); }
+.text-danger { color: var(--danger); }
+.text-success { color: var(--success); }
 
-/* Ocultar el marker por defecto de details */
-.expense-card details {
-    position: relative;
-}
-
-.expense-card details summary {
-    list-style: none;
-    cursor: pointer;
-}
-
-/* Firefox: ocultar marker */
-.expense-card details summary::-webkit-details-marker {
-    display: none;
-}
-
-.expense-card details summary::marker {
-    content: '';
-    display: none;
-}
-
-/* Indicador visual de expansión */
-.expense-card details summary::after {
-    content: '▶';
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: transform 0.2s ease;
+.loading-spinner {
+    text-align: center;
+    padding: 1rem;
     color: var(--text-muted);
-    font-size: 0.8rem;
 }
 
-.expense-card details[open] summary::after {
-    transform: translateY(-50%) rotate(90deg);
+.friend-status {
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
-/* Mostrar detalles cuando está abierto */
-.expense-card details[open] .card-details {
-    display: block;
+.friend-status.settled {
+    color: var(--success);
+}
+
+.friend-status.pending {
+    color: var(--danger);
 }
 
 /* =========================================
-   13. ESTILOS PARA MODALES DE MENSAJES
+   12. ESTILOS PARA MODALES DE MENSAJES
    ========================================= */
 #message-modal, #confirm-modal {
     max-width: 400px;

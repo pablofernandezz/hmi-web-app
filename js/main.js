@@ -7,7 +7,7 @@ let currentContributionData = null;
 let loadingCounter = 0;
 let listaGastosCache = [];
 
-// --- NUEVAS FUNCIONES PARA REEMPLAZAR ALERT/CONFIRM ---
+// --- FUNCIONES PARA MODALES DE MENSAJE ---
 function showMessage(message, title = 'Aviso') {
     return new Promise((resolve) => {
         const modal = document.getElementById('message-modal');
@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAddModalListeners();
     setupContributionListeners();
     setupNavigation();
+    setupGlobalEventListeners();
 });
 
 // --- UTILIDADES DE CARGA ---
@@ -98,7 +99,57 @@ async function initDashboard() {
     }
 }
 
-// --- SETUP LISTENERS ---
+// --- SETUP LISTENERS GLOBALES ---
+function setupGlobalEventListeners() {
+    // Delegación de eventos para botones de acción
+    document.addEventListener('click', async (e) => {
+        // Botones de editar
+        if (e.target.closest('.btn-edit')) {
+            const button = e.target.closest('.btn-edit');
+            const expenseId = button.dataset.expenseId;
+            if (expenseId) {
+                await abrirModalEdicion(parseInt(expenseId));
+            }
+        }
+        
+        // Botones de eliminar
+        if (e.target.closest('.btn-delete')) {
+            const button = e.target.closest('.btn-delete');
+            const expenseId = button.dataset.expenseId;
+            if (expenseId) {
+                await eliminarGasto(parseInt(expenseId));
+            }
+        }
+        
+        // Botones de pagar
+        if (e.target.closest('.btn-pay')) {
+            const button = e.target.closest('.btn-pay');
+            const gastoId = button.dataset.expenseId;
+            const amigoId = button.dataset.friendId;
+            const nombreAmigo = button.dataset.friendName;
+            const deudaActual = parseFloat(button.dataset.debtAmount);
+            
+            if (gastoId && amigoId && nombreAmigo && deudaActual) {
+                abrirModalAporte(
+                    parseInt(gastoId), 
+                    parseInt(amigoId), 
+                    nombreAmigo, 
+                    deudaActual
+                );
+            }
+        }
+        
+        // Botones de ver detalle
+        if (e.target.closest('.btn-view-detail')) {
+            const button = e.target.closest('.btn-view-detail');
+            const expenseId = button.dataset.expenseId;
+            if (expenseId) {
+                irAVerGasto(parseInt(expenseId));
+            }
+        }
+    });
+}
+
 function setupModalListeners() {
     const modal = document.getElementById('edit-modal');
     const btnCancel = document.getElementById('btn-cancel-edit');
@@ -221,8 +272,7 @@ async function cargarAmigosEnModal(containerId, inputName, participantesActuales
     }
 }
 
-// --- 1. EXPENSEs ---
-
+// --- 1. GASTOS ---
 async function cargarListaGastos() {
     const contenedor = document.getElementById('expenses-list');
     
@@ -236,7 +286,7 @@ async function cargarListaGastos() {
         contenedor.innerHTML = '';
         
         if (gastos.length === 0) {
-            contenedor.innerHTML = '<p style="text-align:center; color: #666; margin-top: 2rem;">No hay gastos registrados.</p>';
+            contenedor.innerHTML = '<p class="text-muted">No hay gastos registrados.</p>';
             return;
         }
 
@@ -249,7 +299,7 @@ async function cargarListaGastos() {
         
     } catch (error) {
         console.error(error);
-        contenedor.innerHTML = '<p class="error" style="text-align:center; color: var(--danger);">Error cargando los gastos. Revisa el servidor.</p>';
+        contenedor.innerHTML = '<p class="text-danger">Error cargando los gastos. Revisa el servidor.</p>';
     }
 }
 
@@ -275,48 +325,57 @@ function crearTarjetaGasto(gasto) {
     }
 
     article.innerHTML = `
-        <details>
-            <summary class="card-summary">
-                <div class="expense-icon" aria-hidden="true">${icono}</div>
-                <div class="expense-details">
-                    <h3>${gasto.description}</h3>
-                    <time datetime="${gasto.date}">${fechaStr}</time>
-                </div>
-                <div class="expense-amount">
-                    <span class="price">${precioFmt}</span>
-                    ${statusHtml}
-                </div>
-            </summary>
-            
-            <section class="card-details mobile-only" id="mobile-details-${gasto.id}">
-                <div class="loading-spinner" style="text-align:center; padding: 1rem; color: #888;">
-                    Cargando información...
-                </div>
-            </section>
-        </details>
+        <button class="card-summary" aria-expanded="false" aria-controls="mobile-details-${gasto.id}">
+            <div class="expense-icon" aria-hidden="true">${icono}</div>
+            <div class="expense-details">
+                <h3>${gasto.description}</h3>
+                <time datetime="${gasto.date}">${fechaStr}</time>
+            </div>
+            <div class="expense-amount">
+                <span class="price">${precioFmt}</span>
+                ${statusHtml}
+            </div>
+            <span class="expand-icon" aria-hidden="true">▶</span>
+        </button>
+        
+        <section class="card-details mobile-only" id="mobile-details-${gasto.id}">
+            <div class="loading-spinner">Cargando información...</div>
+        </section>
     `;
 
-    const details = article.querySelector('details');
+    const summaryBtn = article.querySelector('.card-summary');
     
-    // Usamos el evento 'toggle' nativo de HTML5
-    details.addEventListener('toggle', async () => {
-        if (details.open) {
-            // Solo en móvil: expandir detalles
-            if (window.innerWidth < 1024) {
-                await cargarYMostrarDetalles(gasto.id, article, true);
-            }
-            
-            // En escritorio: marcar como seleccionado
-            if (window.innerWidth >= 1024) {
-                document.querySelectorAll('.expense-card').forEach(c => {
-                    c.classList.remove('selected');
-                    c.removeAttribute('aria-current'); 
-                });
-                article.classList.add('selected');
-                article.setAttribute('aria-current', 'true'); 
-                
-                await cargarYMostrarDetalles(gasto.id, article, false);
-            }
+    summaryBtn.addEventListener('click', async () => {
+        const isExpanded = article.classList.contains('expanded');
+        
+        // Cerrar otros gastos expandidos en móvil
+        if (window.innerWidth < 1024) {
+            document.querySelectorAll('.expense-card.expanded').forEach(card => {
+                if (card !== article) {
+                    card.classList.remove('expanded');
+                    const btn = card.querySelector('.card-summary');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+        
+        // Alternar estado
+        article.classList.toggle('expanded');
+        summaryBtn.setAttribute('aria-expanded', article.classList.contains('expanded'));
+        
+        // En escritorio: marcar como seleccionado
+        if (window.innerWidth >= 1024) {
+            document.querySelectorAll('.expense-card').forEach(c => {
+                c.classList.remove('selected');
+                c.removeAttribute('aria-current'); 
+            });
+            article.classList.add('selected');
+            article.setAttribute('aria-current', 'true'); 
+        }
+        
+        // Cargar detalles si se expande
+        if (article.classList.contains('expanded')) {
+            await cargarYMostrarDetalles(gasto.id, article, window.innerWidth < 1024);
         }
     });
 
@@ -376,8 +435,14 @@ function generarItemsParticipantes(participantes, gastoId = null) {
              infoHtml = `<span class="friend-status pending">Debe ${formatCurrency(deudaNeta)}</span>`;
              
              if (gastoId) {
-                 const nombreSafe = p.name.replace(/'/g, "\\'");
-                 botonPagarHtml = `<button class="btn-pay" onclick="abrirModalAporte(${gastoId}, ${p.id}, '${nombreSafe}', ${deudaNeta})"> <span aria-hidden="true">💸</span> Pagar</button>`;
+                 botonPagarHtml = `
+                    <button class="btn-pay" 
+                            data-expense-id="${gastoId}"
+                            data-friend-id="${p.id}"
+                            data-friend-name="${p.name.replace(/"/g, '&quot;')}"
+                            data-debt-amount="${deudaNeta}">
+                        <span aria-hidden="true">💸</span> Pagar
+                    </button>`;
              }
 
         } else {
@@ -427,8 +492,12 @@ function generarHtmlDetalles(id, total, pagado, pendiente, participantes) {
         </div>
         
         <div class="actions-container">
-            <button class="btn-action btn-edit" onclick="abrirModalEdicion(${id})"> <span aria-hidden="true">✏️</span> Editar</button>
-            <button class="btn-action btn-delete" onclick="eliminarGasto(${id})"> <span aria-hidden="true">🗑️</span> Eliminar</button>
+            <button class="btn-action btn-edit" data-expense-id="${id}">
+                <span aria-hidden="true">✏️</span> Editar
+            </button>
+            <button class="btn-action btn-delete" data-expense-id="${id}">
+                <span aria-hidden="true">🗑️</span> Eliminar
+            </button>
         </div>
     `;
 }
@@ -459,15 +528,18 @@ function renderizarPanelEscritorio(gasto, total, pagado, pendiente, participante
     if(actionsPlaceholder) {
         actionsPlaceholder.innerHTML = `
             <div class="actions-container">
-                <button class="btn-action btn-edit" onclick="abrirModalEdicion(${gasto.id})"> <span aria-hidden="true">✏️</span> Editar</button>
-                <button class="btn-action btn-delete" onclick="eliminarGasto(${gasto.id})"> <span aria-hidden="true">🗑️</span> Eliminar</button>
+                <button class="btn-action btn-edit" data-expense-id="${gasto.id}">
+                    <span aria-hidden="true">✏️</span> Editar
+                </button>
+                <button class="btn-action btn-delete" data-expense-id="${gasto.id}">
+                    <span aria-hidden="true">🗑️</span> Eliminar
+                </button>
             </div>
         `;
     }
 }
 
 // --- 2. LOGICA DE CREAR Y EDITAR ---
-
 async function crearNuevoGasto() {
     const desc = document.getElementById('add-desc').value;
     const amount = parseFloat(document.getElementById('add-amount').value);
@@ -748,7 +820,7 @@ async function guardarAporte() {
         
         const tarjeta = document.getElementById(`gasto-${gastoId}`);
         if(tarjeta) {
-            const esMovilExpandido = tarjeta.querySelector('details').open;
+            const esMovilExpandido = tarjeta.classList.contains('expanded');
             await cargarYMostrarDetalles(gastoId, tarjeta, esMovilExpandido);
         }
         
@@ -762,7 +834,6 @@ async function guardarAporte() {
 }
 
 // --- UTILS ---
-
 function actualizarTotalGastos(gastos) {
     const total = gastos.reduce((acc, g) => acc + (Number(g.amount) || 0), 0);
     const el = document.getElementById('dashboard-total');
@@ -807,6 +878,7 @@ function obtenerIcono(texto) {
     const t = (texto || "").toLowerCase();
     if (t.includes('viaje') || t.includes('vuelo')) return '✈️';
     if (t.includes('cena') || t.includes('comida') || t.includes('compra')) return '🍔';
+    if (t.includes('regalo')) return '🎁';
     if (t.includes('gasolina') || t.includes('coche')) return '⛽';
     if (t.includes('hotel') || t.includes('alojamiento') || t.includes('casa')) return '🏨';
     return '💸';
@@ -826,7 +898,6 @@ function setupNavigation() {
         btnExpenses.classList.add('active');
         btnFriends.classList.remove('active');
         
-        // ACCESIBILIDAD: Actualizar estado ARIA
         btnExpenses.setAttribute('aria-selected', 'true');
         btnFriends.setAttribute('aria-selected', 'false');
         
@@ -842,11 +913,9 @@ function setupNavigation() {
         btnFriends.classList.add('active');
         btnExpenses.classList.remove('active');
         
-        // ACCESIBILIDAD: Actualizar estado ARIA
         btnFriends.setAttribute('aria-selected', 'true');
         btnExpenses.setAttribute('aria-selected', 'false');
         
-        // Mostrar/Ocultar vistas
         viewExpenses.classList.add('hidden');
         viewFriends.classList.remove('hidden');
         panelExpenses.classList.add('hidden');
@@ -868,7 +937,7 @@ async function cargarListaAmigos() {
 
         contenedor.innerHTML = '';
         if (amigos.length === 0) {
-            contenedor.innerHTML = '<p>No hay amigos.</p>';
+            contenedor.innerHTML = '<p class="text-muted">No hay amigos.</p>';
             return;
         }
 
@@ -900,39 +969,50 @@ function crearTarjetaAmigo(amigo) {
     }
 
     article.innerHTML = `
-        <details>
-            <summary class="card-summary">
-                <div class="friend-icon" aria-hidden="true">👤</div>
-                <div class="expense-details">
-                    <h3>${amigo.name}</h3>
-                </div>
-                <div class="expense-amount">
-                    <span class="price" style="color: ${colorStyle}">${balanceHtml}</span>
-                    <span class="status settled">Ver gastos</span>
-                </div>
-            </summary>
+        <button class="card-summary" aria-expanded="false" aria-controls="mobile-details-${amigo.id}">
+            <div class="friend-icon" aria-hidden="true">👤</div>
+            <div class="expense-details">
+                <h3>${amigo.name}</h3>
+            </div>
+            <div class="expense-amount">
+                <span class="price" style="color: ${colorStyle}">${balanceHtml}</span>
+                <span class="status settled">Ver gastos</span>
+            </div>
+            <span class="expand-icon" aria-hidden="true">▶</span>
+        </button>
 
-            <section class="card-details mobile-only">
-                <div class="participants-section">
-                    <div class="loading-spinner">Cargando historial...</div>
-                </div>
-            </section>
-        </details>
+        <section class="card-details mobile-only" id="mobile-details-${amigo.id}">
+            <div class="loading-spinner">Cargando historial...</div>
+        </section>
     `;
 
-    const details = article.querySelector('details');
+    const summaryBtn = article.querySelector('.card-summary');
     
-    details.addEventListener('toggle', async () => {
-        if (details.open) {
-            document.querySelectorAll('#friends-list .expense-card details').forEach(d => {
-                if(d !== details) d.open = false;
-            });
-            
+    summaryBtn.addEventListener('click', async () => {
+        const isExpanded = article.classList.contains('expanded');
+        
+        // Cerrar otros amigos expandidos
+        document.querySelectorAll('#friends-list .expense-card.expanded').forEach(card => {
+            if (card !== article) {
+                card.classList.remove('expanded');
+                const btn = card.querySelector('.card-summary');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+        
+        // Alternar estado
+        article.classList.toggle('expanded');
+        summaryBtn.setAttribute('aria-expanded', article.classList.contains('expanded'));
+        
+        // En escritorio: marcar como seleccionado
+        if (window.innerWidth >= 1024) {
             document.querySelectorAll('#friends-list .expense-card').forEach(c => c.classList.remove('selected'));
             article.classList.add('selected');
-            
-            const isExpanded = details.open;
-            await cargarDetalleAmigo(amigo, article, isExpanded);
+        }
+        
+        // Cargar detalles si se expande
+        if (article.classList.contains('expanded')) {
+            await cargarDetalleAmigo(amigo, article, true);
         }
     });
 
@@ -1033,7 +1113,7 @@ async function cargarDetalleAmigo(amigo, cardElement, isMobileExpanded) {
                         </div>
                     </div>
                     <div style="text-align:right;">
-                        <button class="btn-view-detail" onclick="irAVerGasto(${g.id})">
+                        <button class="btn-view-detail" data-expense-id="${g.id}">
                             <span aria-hidden="true">👁️</span> Ver
                         </button>
                     </div>
@@ -1084,10 +1164,10 @@ function irAVerGasto(idGasto) {
         const tarjeta = document.getElementById(`gasto-${idGasto}`);
         if (tarjeta) {
             tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            const details = tarjeta.querySelector('details');
-            if(details) details.open = true;
-            // No podemos hacer 'click' en details, disparar evento
-            details.dispatchEvent(new Event('toggle'));
+            tarjeta.classList.add('expanded');
+            const btn = tarjeta.querySelector('.card-summary');
+            if(btn) btn.setAttribute('aria-expanded', 'true');
+            cargarYMostrarDetalles(idGasto, tarjeta, window.innerWidth < 1024);
         }
     }, 100);
 }

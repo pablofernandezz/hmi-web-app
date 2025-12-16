@@ -12,10 +12,10 @@
     <header class="site-header">
         <div class="container">
             <h1>SplitWithMe 💸</h1>
-            <nav class="view-nav" role="tablist" aria-label="Secciones principales">
+            <div class="view-nav" role="tablist" aria-label="Secciones principales">
                 <button id="nav-expenses" class="nav-tab active" role="tab" aria-selected="true" aria-controls="view-expenses">Gastos</button>
                 <button id="nav-friends" class="nav-tab" role="tab" aria-selected="false" aria-controls="view-friends">Amigos</button>
-            </nav>
+            </div>
         </div>
     </header>
 
@@ -24,8 +24,7 @@
         <div class="master-column">
             
             <div id="view-expenses" role="tabpanel" aria-labelledby="nav-expenses">
-                <section class="summary" aria-label="Resumen financiero">
-                    <h2 class="visually-hidden">Resumen de Cuentas</h2>
+                <section class="summary" aria-label="Resumen de cuentas">
                     <div class="summary-card total" aria-live="polite" aria-atomic="true">
                         <p>Gasto Total</p>
                         <p class="amount" id="dashboard-total">-- €</p>
@@ -36,7 +35,7 @@
                     </div>
                 </section>
 
-                <section class="expenses-list">
+                <section class="expenses-list" aria-live="polite" aria-atomic="true">
                     <h2>Historial de Gastos</h2>
                     <div id="expenses-list">
                         <p>Cargando gastos...</p>
@@ -45,7 +44,7 @@
             </div>
 
             <div id="view-friends" class="hidden" role="tabpanel" aria-labelledby="nav-friends">
-                <section class="expenses-list">
+                <section class="expenses-list" aria-live="polite" aria-atomic="true">
                     <h2>Mis Amigos</h2>
                     <div id="friends-list">
                         <p class="text-muted">Cargando lista...</p>
@@ -69,7 +68,7 @@
                     </div>
                 </header>
 
-                <div class="detail-body">
+                <div class="detail-body" aria-live="polite" aria-atomic="true">
                     <div class="financial-summary">
                         <div class="fin-item">
                             <span class="label">Total</span>
@@ -92,7 +91,7 @@
                     </div>
 
                     <div class="actions-placeholder">
-                        <p><em>Haz click en un gasto para ver detalles...</em></p>
+                        <p class="text-muted">Haz click en un gasto para ver detalles...</p>
                     </div>
                 </div>
             </div>
@@ -102,13 +101,13 @@
             <h2 class="visually-hidden">Panel de Detalle de Amigo</h2>
             <div class="detail-container">
                 <header class="detail-header">
-                    <div class="expense-icon-large" aria-hidden="true" style="background:#e3f2fd;">👤</div>
+                    <div class="expense-icon-large" aria-hidden="true">👤</div>
                     <div>
                         <h3 id="friend-detail-name">Selecciona un amigo</h3>
                     </div>
                 </header>
 
-                <div class="detail-body">
+                <div class="detail-body" aria-live="polite" aria-atomic="true">
                     <div class="financial-summary">
                         <div class="fin-item">
                             <span class="label">Balance Total</span>
@@ -133,7 +132,7 @@
     </footer>
 
     <button id="btn-add-expense" class="fab-btn">
-        <span style="font-size: 1.5rem; line-height: 1;">+</span> Nuevo Gasto
+        <span class="fab-icon">+</span> Nuevo Gasto
     </button>
 
     <dialog id="add-modal" class="modal-dialog" aria-labelledby="title-add-modal">
@@ -145,7 +144,8 @@
             </div>
             <div class="form-group">
                 <label for="add-amount">Importe (€)</label>
-                <input type="number" id="add-amount" step="0.01" min="0.01" required placeholder="0.00">            </div>
+                <input type="number" id="add-amount" step="0.01" min="0.01" required placeholder="0.00">
+            </div>
             <div class="form-group">
                 <label for="add-date">Fecha</label>
                 <input type="date" id="add-date" required>
@@ -172,7 +172,8 @@
             </div>
             <div class="form-group">
                 <label for="edit-amount">Importe (€)</label>
-                <input type="number" id="edit-amount" step="0.01" min="0.01" required>            </div>
+                <input type="number" id="edit-amount" step="0.01" min="0.01" required>
+            </div>
             <div class="form-group">
                 <label for="edit-date">Fecha</label>
                 <input type="date" id="edit-date" required>
@@ -194,10 +195,11 @@
     <dialog id="contribution-modal" class="modal-dialog" aria-labelledby="title-contribution-modal">
         <form id="contribution-form">
             <h3 id="title-contribution-modal">Registrar Aporte</h3>
-            <p id="contribution-subtitle" class="text-muted" style="margin-bottom: 1rem;">--</p>
+            <p id="contribution-subtitle" class="text-muted">--</p>
             <div class="form-group">
                 <label for="contribution-amount">Cantidad a pagar (€)</label>
-                <input type="number" id="contribution-amount" step="0.01" min="0.01" required>                <p class="small-info">Máximo pendiente: <span id="max-contribution">0.00</span> €</p>
+                <input type="number" id="contribution-amount" step="0.01" min="0.01" required>
+                <p class="small-info">Máximo pendiente: <span id="max-contribution">0.00</span> €</p>
             </div>
             <div class="modal-actions">
                 <button type="button" id="btn-cancel-contribution" class="btn-secondary">Cancelar</button>
