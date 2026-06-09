@@ -1,69 +1,59 @@
-# Curso 25/26. Práctica 3. Interfaces gráficas para aplicaciones web
+# 💸 SplitWithMe - Cliente Web (HMI)
 
-![Image of the assigment](life-b4-autocad.jpeg)
+![Estado del proyecto](https://img.shields.io/badge/Estado-Completado-success)
+![Contexto Académico](https://img.shields.io/badge/Contexto-UDC_FIC-blue)
+![Asignatura](https://img.shields.io/badge/Asignatura-IPM-orange)
 
-_Repositorio dedicado al desarrollo de la tercera práctica de equipo
-de IPM_
+Aplicación web desarrollada para la gestión y división de gastos compartidos, diseñada con un enfoque responsivo y centrado en la usabilidad multiplataforma.
 
+Este repositorio contiene exclusivamente el **Cliente Web**. Puedes consultar la versión nativa de escritorio de este mismo sistema en el siguiente enlace:
+👉 **[SplitWithMe - Cliente de Escritorio](https://github.com/pablofernandezz/hmi-desktop-app)**
 
-La práctica consiste en el desarrollo de varios ejercicios relacionados
-con el desarrollo de interfaces para aplicaciones web.
+---
 
-Este repositorio contiene:
+## 🛠️ Tecnologías Utilizadas
 
-  - Un documento que describe los _roles_ a desempeñar en el desarrollo
-    de la práctica.
-    
-  - Un enunciado que describe el trabajo a realizar en el desarrollo
-    de la práctica.
-    
-  - Un conjunto de rúbricas válidas tanto para la evaluación como para
-    la autoevaluación del trabajo realizado.
+* **Estructura y Estilos:** HTML5, CSS3
+* **Lógica de Cliente:** JavaScript
+* **Comunicación:** API Fetch / peticiones HTTP a API RESTful
 
-> :warning: No conocer el contenido de este repositorio, README,
-> enunciado, roles, ... conllevará una calificación de cero puntos.
-  
-  
-## Miembros del equipo:
+## 🏗️ Arquitectura del Sistema
 
-- Ramos Carro Joel : joelramos05 : joel.ramosc@udc.es : curador
-- Fernández Martí Pablo : PabloFernandezMarti : pablo.fernandez@udc.es : analista
-- Domínguez Souto Nicolás : nikkodominguez : nicolas.dominguez@udc.es : administrador
+Este proyecto es el cliente web que interactúa con un servidor backend externo. Mientras la API externa centraliza la persistencia de datos y el cálculo de deudas, esta aplicación web se encarga de renderizar la interfaz en el navegador y gestionar las interacciones del usuario de forma dinámica.
 
+## ⚙️ Instalación y Despliegue Local
 
-## Pasos para realizar la práctica
+Para que la aplicación web funcione correctamente, la API backend debe estar operativa en tu máquina local.
 
-1. Si estás leyendo este _README_ es porque has creado el repositorio
-   correspondiente desde el enlace de _github classroom_. Asegúrate de
-   ello.
-	 
-2. Asignar los roles a cada miembro del equipo. La información
-   relativa a los roles se encuentra en el fichero [roles.md](roles.md).
-   
-3. Cubrir el apartado "Miembros del equipo" siguiendo el formato
-   establecido.
-   
-4. Leer y comprender el enunciado de la práctica, disponible en el
-   fichero [enunciado.md](enunciado.md).
+### 1. Levantar la API Backend (Dependencia Externa)
+La API requerida es `splitwithme`:
+1. Clona el repositorio de la API: 
+   `git clone https://github.com/nbarreira/splitwithme`
+2. Sigue las instrucciones de ese repositorio para arrancar el servidor.
 
-5. Leer y comprender las rúbricas disponibles en el fichero
-   [rubricas.md](rubricas.md).
+### 2. Ejecutar el Cliente Web
+Una vez la API esté en marcha:
 
-6. Planificar y coordinar el trabajo entre los miembros del equipo.
+1. Clona este repositorio:
+```bash
+   git clone [https://github.com/pablofernandezz/hmi-web-app.git](https://github.com/pablofernandezz/hmi-web-app.git)
+   cd hmi-web-app
+``` 
+2. Abre el archivo principal en tu navegador (o levanta un servidor de desarrollo ligero si utilizas módulos JS):
+```bash
+   # Ejemplo usando Python para servir la web en local rápidamente
+   python -m http.server 8000
+```
+3. Accede a http://localhost:8000 en tu navegador.
 
-6. Realizar la tarea 1.
+🎓 Contexto Académico y Equipo
 
-8. Presentar la tarea 1 y realizar las correcciones indicadas.
+Este proyecto fue desarrollado de forma colaborativa como parte de la asignatura de Interacción Persona-Máquina (IPM) en la Facultade de Informática da Coruña (FIC - UDC), con el objetivo de diseñar interfaces web accesibles y amigables para el usuario.
 
-9. Realizar la tarea 2.
+Desarrollado por:
 
-10. Presentar la tarea 2 y realizar las correcciones indicadas.
+    Pablo Fernández Martí
 
-11. Realizar la tarea 3.
+	Joel Ramos Carro
 
-12. Presentar la tarea 3 y realizar las correcciones indicadas.
-
-13. Revisar el contenido del repositorio en github.
-
-14. Presentar la práctica ya finalizada.
- 
+    Nicolás Domíguez Souto
